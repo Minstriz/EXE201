@@ -1,0 +1,398 @@
+{
+  "orders": [
+    {
+      "id": 10000,
+      "userId": "1",
+      "items": [
+        {
+          "id": 2,
+          "name": "Áo Thun Xanh",
+          "price": 450000,
+          "image": "/images/20.png",
+          "category": "Áo Thun",
+          "quantity": 1
+        },
+        {
+          "id": 3,
+          "name": "Áo Thun Trắng",
+          "price": 450000,
+          "image": "/images/21.png",
+          "category": "Áo Thun",
+          "quantity": 1
+        }
+      ],
+      "totalAmount": 900000,
+      "status": "delivered",
+      "createdAt": "2025-05-31T17:37:06.753Z"
+    },
+    {
+      "id": 10001,
+      "userId": "1",
+      "items": [
+        {
+          "id": 2,
+          "name": "Áo Thun Xanh",
+          "price": 450000,
+          "image": "/images/20.png",
+          "category": "Áo Thun",
+          "quantity": 1
+        },
+        {
+          "id": 3,
+          "name": "Áo Thun Trắng",
+          "price": 450000,
+          "image": "/images/21.png",
+          "category": "Áo Thun",
+          "quantity": 1
+        }
+      ],
+      "totalAmount": 900000,
+      "status": "pending",
+      "createdAt": "2025-05-31T17:37:49.170Z"
+    },
+    {
+      "id": 10002,
+      "userId": "1",
+      "items": [
+        {
+          "id": 2,
+          "name": "Áo Thun Xanh",
+          "price": 450000,
+          "image": "/images/20.png",
+          "category": "Áo Thun",
+          "quantity": 2
+        },
+        {
+          "id": 3,
+          "name": "Áo Thun Trắng",
+          "price": 450000,
+          "image": "/images/21.png",
+          "category": "Áo Thun",
+          "quantity": 1
+        }
+      ],
+      "totalAmount": 1350000,
+      "status": "pending",
+      "createdAt": "2025-05-31T17:42:10.060Z"
+    },
+    {
+      "id": 10003,
+      "userId": "e052",
+      "items": [
+        {
+          "id": 2,
+          "name": "Áo Thun Xanh",
+          "image": "/images/20.png",
+          "category": "Áo Thun",
+          "price": 450000,
+          "quantity": 1
+        }
+      ],
+      "totalAmount": 450000,
+      "status": "delivered",
+      "createdAt": "2025-05-31T18:47:55.723Z"
+    },
+    {
+      "id": 10004,
+      "userId": "e052",
+      "items": [
+        {
+          "id": 2,
+          "name": "Áo Thun Xanh",
+          "image": "/images/20.png",
+          "category": "Áo Thun",
+          "price": 450000,
+          "quantity": 1
+        }
+      ],
+      "totalAmount": 450000,
+      "status": "pending",
+      "createdAt": "2025-05-31T18:49:46.869Z"
+    },
+    {
+      "id": 10005,
+      "userId": "e052",
+      "items": [
+        {
+          "id": 2,
+          "name": "Áo Thun Xanh",
+          "image": "/images/20.png",
+          "category": "Áo Thun",
+          "price": 450000,
+          "quantity": 2
+        },
+        {
+          "id": 3,
+          "name": "Áo Thun Trắng",
+          "image": "/images/21.png",
+          "category": "Áo Thun",
+          "price": 450000,
+          "quantity": 1
+        }
+      ],
+      "totalAmount": 1350000,
+      "status": "pending",
+      "createdAt": "2025-05-31T18:58:02.135Z"
+    },
+    {
+      "id": 10006,
+      "userId": "e052",
+      "items": [
+        {
+          "id": 3,
+          "name": "Áo Thun Trắng",
+          "image": "/images/21.png",
+          "category": "Áo Thun",
+          "price": 450000,
+          "quantity": 1
+        }
+      ],
+      "totalAmount": 450000,
+      "status": "pending",
+      "createdAt": "2025-05-31T19:04:38.563Z"
+    },
+    {
+      "id": 10007,
+      "userId": "e052",
+      "items": [
+        {
+          "id": 5,
+          "name": "Túi Tote Đen",
+          "image": "/images/23.png",
+          "category": "Túi tote",
+          "price": 210000,
+          "quantity": 1
+        }
+      ],
+      "totalAmount": 210000,
+      "status": "pending",
+      "createdAt": "2025-05-31T19:14:56.404Z"
+    },
+    {
+      "id": 10008,
+      "userId": "e052",
+      "items": [
+        {
+          "id": 5,
+          "name": "Túi Tote Đen",
+          "image": "/images/23.png",
+          "category": "Túi tote",
+          "price": 210000,
+          "quantity": 1
+        }
+      ],
+      "totalAmount": 210000,
+      "status": "pending",
+      "createdAt": "2025-05-31T19:17:53.055Z"
+    },
+    {
+      "id": 10009,
+      "userId": "e052",
+      "items": [
+        {
+          "id": 5,
+          "name": "Túi Tote Đen",
+          "image": "/images/23.png",
+          "category": "Túi tote",
+          "price": 210000,
+          "quantity": 1
+        }
+      ],
+      "totalAmount": 210000,
+      "status": "pending",
+      "createdAt": "2025-05-31T19:18:53.055Z"
+    },
+    {
+      "id": 11,
+      "userId": "e052",
+      "items": [
+        {
+          "id": 1,
+          "name": "Áo Thun Đen",
+          "image": "/images/19.png",
+          "category": "Áo Thun",
+          "price": 200000,
+          "quantity": 1
+        },
+        {
+          "id": 3,
+          "name": "Áo Thun Trắng",
+          "image": "/images/21.png",
+          "category": "Áo Thun",
+          "price": 450000,
+          "quantity": 1
+        },
+        {
+          "id": 4,
+          "name": "Túi Tote Xanh",
+          "image": "/images/23.png",
+          "category": "Túi tote",
+          "price": 500000,
+          "quantity": 1
+        }
+      ],
+      "totalAmount": 1150000,
+      "status": "pending",
+      "createdAt": "2025-05-31T20:16:03.806Z"
+    },
+    {
+      "id": 12,
+      "userId": "e052",
+      "items": [
+        {
+          "id": 3,
+          "name": "Áo Thun Trắng",
+          "image": "/images/21.png",
+          "category": "Áo Thun",
+          "price": 450000,
+          "quantity": 1
+        },
+        {
+          "id": 2,
+          "name": "Áo Thun Xanh",
+          "image": "/images/20.png",
+          "category": "Áo Thun",
+          "price": 450000,
+          "quantity": 1
+        },
+        {
+          "id": 4,
+          "name": "Túi Tote Xanh",
+          "image": "/images/23.png",
+          "category": "Túi tote",
+          "price": 500000,
+          "quantity": 1
+        }
+      ],
+      "totalAmount": 1400000,
+      "status": "pending",
+      "createdAt": "2025-05-31T20:16:36.221Z"
+    },
+    {
+      "id": 13,
+      "userId": "e052",
+      "items": [
+        {
+          "id": 5,
+          "name": "Túi Tote Đen",
+          "image": "/images/23.png",
+          "category": "Túi tote",
+          "price": 210000,
+          "quantity": 1
+        }
+      ],
+      "totalAmount": 210000,
+      "status": "pending",
+      "createdAt": "2025-05-31T20:18:20.417Z"
+    },
+    {
+      "id": 10010,
+      "userId": "e052",
+      "items": [
+        {
+          "id": 2,
+          "name": "Áo Thun Xanh",
+          "image": "/images/20.png",
+          "category": "Áo Thun",
+          "price": 450000,
+          "quantity": 1
+        }
+      ],
+      "totalAmount": 450000,
+      "status": "pending",
+      "createdAt": "2025-05-31T20:19:33.878Z"
+    },
+    {
+      "id": 10011,
+      "userId": "e052",
+      "items": [
+        {
+          "id": 5,
+          "name": "Túi Tote Đen",
+          "image": "/images/23.png",
+          "category": "Túi tote",
+          "price": 210000,
+          "quantity": 1
+        }
+      ],
+      "totalAmount": 210000,
+      "status": "cancelled",
+      "createdAt": "2025-05-31T20:20:43.347Z"
+    },
+    {
+      "id": 10012,
+      "userId": "2c75",
+      "items": [
+        {
+          "id": 1,
+          "name": "Áo Thun Đen",
+          "image": "/images/19.png",
+          "category": "Áo Thun",
+          "price": 200000,
+          "quantity": 1
+        }
+      ],
+      "totalAmount": 200000,
+      "status": "pending",
+      "createdAt": "2025-05-31T20:26:36.622Z"
+    },
+    {
+      "id": 10013,
+      "userId": "ca10",
+      "items": [
+        {
+          "id": 1,
+          "name": "Áo Thun Đen",
+          "image": "/images/19.png",
+          "category": "Áo Thun",
+          "price": 200000,
+          "quantity": 1
+        },
+        {
+          "id": 2,
+          "name": "Áo Thun Xanh",
+          "image": "/images/20.png",
+          "category": "Áo Thun",
+          "price": 450000,
+          "quantity": 1
+        },
+        {
+          "id": 4,
+          "name": "Túi Tote Xanh",
+          "image": "/images/23.png",
+          "category": "Túi tote",
+          "price": 500000,
+          "quantity": 1
+        }
+      ],
+      "totalAmount": 1150000,
+      "status": "pending",
+      "createdAt": "2025-05-31T20:30:00.899Z"
+    },
+    {
+      "id": 10014,
+      "userId": "ca10",
+      "items": [
+        {
+          "id": 4,
+          "name": "Túi Tote Xanh",
+          "image": "/images/23.png",
+          "category": "Túi tote",
+          "price": 500000,
+          "quantity": 1
+        },
+        {
+          "id": 5,
+          "name": "Túi Tote Đen",
+          "image": "/images/23.png",
+          "category": "Túi tote",
+          "price": 210000,
+          "quantity": 1
+        }
+      ],
+      "totalAmount": 710000,
+      "status": "pending",
+      "createdAt": "2025-05-31T20:33:17.648Z"
+    }
+  ]
+}

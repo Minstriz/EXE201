@@ -1,0 +1,27 @@
+{
+  "users": [
+    {
+      "id": "1",
+      "username": "demo",
+      "email": "demo@example.com",
+      "password": "123456",
+      "fullName": "Nguyễn Văn Quặm",
+      "phone": "0123456789",
+      "address": "123 Đường ABC",
+      "city": "Hồ Chí Minh",
+      "province": "Hồ Chí Minh",
+      "createdAt": "2024-03-20T10:00:00.000Z"
+    },
+    {
+      "id": "e052",
+      "username": "Minstriz",
+      "password": "123456",
+      "fullName": "Đỗ Minh Trí",
+      "email": "dominhtri1788@gmail.com",
+      "phone": "0704651788",
+      "address": "2397 Phạm Thế Hiển p7q8",
+      "city": "TP. Hồ Chí Minh",
+      "province": "Quận 8"
+    }
+  ]
+}
