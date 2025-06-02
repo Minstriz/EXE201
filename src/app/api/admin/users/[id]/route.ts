@@ -1,58 +1,75 @@
-import { NextResponse, NextRequest } from 'next/server';
-import fs from 'fs';
-import path from 'path';
+import { NextResponse } from 'next/server';
+// Removed fs and path imports
+// import fs from 'fs';
+// import path from 'path';
 
-const usersFilePath = path.join(process.cwd(), 'data', 'users.json');
+import connectDB from '@/lib/mongodb';
+import User from '@/models/User';
+import mongoose from 'mongoose';
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+// Removed usersFilePath constant
+// const usersFilePath = path.join(process.cwd(), 'data', 'users.json');
+
+// Connect to database
+connectDB();
+
+export async function GET(request: Request, { params }: { params: { id: string } }) {
+  await connectDB();
+  const { id } = await params;
+
+  // Check if the ID is a valid MongoDB ObjectId
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return NextResponse.json({ message: 'Invalid User ID' }, { status: 400 });
+  }
+
   try {
-    const { id } = params;
-    const updatedUserData = await req.json();
-
-    // Read existing data
-    const fileContents = fs.readFileSync(usersFilePath, 'utf8');
-    const data = JSON.parse(fileContents);
-
-    // Find the user and update
-    const userIndex = data.users.findIndex((user: any) => user.id === id);
-    if (userIndex === -1) {
+    const user = await User.findById(id);
+    if (!user) {
       return NextResponse.json({ message: 'User not found' }, { status: 404 });
     }
-
-    data.users[userIndex] = { ...data.users[userIndex], ...updatedUserData };
-
-    // Write updated data back
-    fs.writeFileSync(usersFilePath, JSON.stringify(data, null, 2), 'utf8');
-
-    return NextResponse.json({ message: 'User updated successfully', user: data.users[userIndex] });
+    return NextResponse.json(user, { status: 200 });
   } catch (error) {
-    console.error('Error updating user:', error);
-    return NextResponse.json({ message: 'Error updating user' }, { status: 500 });
+    return NextResponse.json({ message: (error as Error).message }, { status: 500 });
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: Request, { params }: { params: { id: string } }) {
+  await connectDB();
+  const { id } = await params;
+
+  // Check if the ID is a valid MongoDB ObjectId
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return NextResponse.json({ message: 'Invalid User ID' }, { status: 400 });
+  }
+
   try {
-    const { id } = params;
-
-    // Read existing data
-    const fileContents = fs.readFileSync(usersFilePath, 'utf8');
-    const data = JSON.parse(fileContents);
-
-    // Filter out the user to delete
-    const initialLength = data.users.length;
-    data.users = data.users.filter((user: any) => user.id !== id);
-
-    if (data.users.length === initialLength) {
+    const body = await request.json();
+    const updatedUser = await User.findByIdAndUpdate(id, body, { new: true, runValidators: true });
+    if (!updatedUser) {
       return NextResponse.json({ message: 'User not found' }, { status: 404 });
     }
-
-    // Write updated data back
-    fs.writeFileSync(usersFilePath, JSON.stringify(data, null, 2), 'utf8');
-
-    return NextResponse.json({ message: 'User deleted successfully' });
+    return NextResponse.json(updatedUser, { status: 200 });
   } catch (error) {
-    console.error('Error deleting user:', error);
-    return NextResponse.json({ message: 'Error deleting user' }, { status: 500 });
+    return NextResponse.json({ message: (error as Error).message }, { status: 400 });
+  }
+}
+
+export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+  await connectDB();
+  const { id } = await params;
+
+  // Check if the ID is a valid MongoDB ObjectId
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return NextResponse.json({ message: 'Invalid User ID' }, { status: 400 });
+  }
+
+  try {
+    const deletedUser = await User.findByIdAndDelete(id);
+    if (!deletedUser) {
+      return NextResponse.json({ message: 'User not found' }, { status: 404 });
+    }
+    return NextResponse.json({ message: 'User deleted successfully' }, { status: 200 });
+  } catch (error) {
+    return NextResponse.json({ message: (error as Error).message }, { status: 500 });
   }
 } 

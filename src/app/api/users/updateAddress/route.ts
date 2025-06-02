@@ -1,76 +1,67 @@
 import { NextResponse } from "next/server";
+import dbConnect from '@/lib/mongodb';
+import User from '@/models/User';
+import mongoose from 'mongoose';
 
 export async function PUT(request: Request) {
+  await dbConnect(); // Kết nối đến MongoDB
   try {
     const body = await request.json();
-    const { userId, address, city, province } = body;
+    // Log the received body
+    console.log("Request body:", body);
 
-    if (!userId || !address || !city || !province) {
+    // Destructure all potentially updatable user fields from the body
+    const { userId, fullName, email, phone, address, city, province } = body;
+
+    if (!userId) {
       return NextResponse.json(
-        { error: "Vui lòng điền đầy đủ thông tin địa chỉ" },
+        { error: "Missing userId" },
         { status: 400 }
       );
     }
 
-    // Get current user from mock backend (port 3001)
-    const userResponse = await fetch(`http://localhost:3001/users/${userId}`);
-    if (!userResponse.ok) {
-      // If user not found in mock backend
-       // Depending on your mock backend setup, you might need to handle 404 or other errors here.
-       // For json-server, fetching a non-existent ID returns 404.
-        const errorText = await userResponse.text(); // Read error response
-       console.error(`Failed to fetch user ${userId} from mock backend: ${userResponse.status} - ${errorText}`);
+    // Check if the userId is a valid MongoDB ObjectId
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return NextResponse.json({ message: 'Invalid User ID' }, { status: 400 });
+    }
 
+    // Find user by ID and update all provided fields in MongoDB
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { // Include all fields that can be updated
+        fullName,
+        email,
+        phone,
+        address,
+        city,
+        province
+      },
+      { new: true, runValidators: true } // new: true returns the updated document
+    );
+
+    if (!updatedUser) {
       return NextResponse.json(
-        { error: "Không tìm thấy người dùng trong hệ thống" }, // Changed message slightly
-        { status: userResponse.status } // Pass through the status from the mock backend
+        { error: "Không tìm thấy người dùng" },
+        { status: 404 }
       );
     }
 
-    const user = await userResponse.json();
+    // Return updated user info (excluding password)
+    const userResponse = updatedUser.toObject();
+    delete userResponse.password;
 
-    // Update user address in the mock backend (port 3001)
-    const updatedUser = {
-      ...user,
-      address,
-      city,
-      province,
-    };
-
-    const response = await fetch(`http://localhost:3001/users/${userId}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(updatedUser),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text(); // Read error response
-       console.error(`Failed to update user ${userId} address in mock backend: ${response.status} - ${errorText}`);
-      throw new Error("Lỗi khi cập nhật địa chỉ người dùng"); // More general error message
-    }
-
-    const result = await response.json();
-
-    // Return updated user info to the frontend
     return NextResponse.json({
       message: "Cập nhật địa chỉ thành công",
-      user: {
-        id: result.id,
-        username: result.username,
-        email: result.email,
-        fullName: result.fullName,
-        phone: result.phone,
-        address: result.address,
-        city: result.city,
-        province: result.province,
-      },
+      user: userResponse,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("API Update address error:", error);
+    let errorMessage = "Đã xảy ra lỗi máy chủ khi cập nhật địa chỉ";
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
     return NextResponse.json(
-      { error: error.message || "Đã xảy ra lỗi máy chủ khi cập nhật địa chỉ" }, // Use error.message
+      { error: errorMessage },
       { status: 500 }
     );
   }

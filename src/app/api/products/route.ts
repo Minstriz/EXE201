@@ -1,53 +1,32 @@
 import { NextResponse } from "next/server";
-import fs from "fs";
-import path from "path";
-
-const productsFilePath = path.join(process.cwd(), "src/data/products.json");
-
-// Helper function to read products
-const readProducts = () => {
-  try {
-    const data = fs.readFileSync(productsFilePath, "utf8");
-    return JSON.parse(data).products;
-  } catch (error) {
-    return [];
-  }
-};
-
-// Helper function to write products
-const writeProducts = (products: any[]) => {
-  try {
-    fs.writeFileSync(productsFilePath, JSON.stringify({ products }, null, 2));
-  } catch (error) {
-    console.error("Error writing products:", error);
-  }
-};
+import connectDB from "@/lib/mongodb";
+import Product from "@/models/Product";
 
 export async function GET(request: Request) {
   try {
+    await connectDB();
     const { searchParams } = new URL(request.url);
     const category = searchParams.get("category");
     const search = searchParams.get("search");
 
-    let products = readProducts();
+    let products;
 
     if (category) {
-      products = products.filter(
-        (product: any) => product.category === category
-      );
-    }
-
-    if (search) {
-      const searchLower = search.toLowerCase();
-      products = products.filter(
-        (product: any) =>
-          product.name.toLowerCase().includes(searchLower) ||
-          product.description.toLowerCase().includes(searchLower)
-      );
+      products = await Product.find({ category });
+    } else if (search) {
+        const searchLower = search.toLowerCase();
+        products = await Product.find({
+            $or: [
+                { name: { $regex: searchLower, $options: 'i' } },
+                { description: { $regex: searchLower, $options: 'i' } },
+            ],
+        });
+    } else {
+      products = await Product.find({});
     }
 
     return NextResponse.json(products);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error fetching products:", error);
     return NextResponse.json(
       { error: "Internal server error" },
@@ -58,6 +37,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    await connectDB();
     const body = await request.json();
     const { name, description, price, image, category } = body;
 
@@ -68,22 +48,18 @@ export async function POST(request: Request) {
       );
     }
 
-    const products = readProducts();
-    const newProduct = {
-      id: products.length + 1,
+    const newProduct = new Product({
       name,
       description,
       price,
       image,
       category,
-      createdAt: new Date().toISOString(),
-    };
+    });
 
-    products.push(newProduct);
-    writeProducts(products);
+    await newProduct.save();
 
     return NextResponse.json(newProduct);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error creating product:", error);
     return NextResponse.json(
       { error: "Internal server error" },

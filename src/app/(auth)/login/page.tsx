@@ -36,8 +36,8 @@ export default function LoginPage() {
       login(data.user);
       toast.success("Đăng nhập thành công");
       router.push("/");
-    } catch (error: any) {
-      toast.error(error.message);
+    } catch (error) {
+      toast.error((error as Error).message);
     } finally {
       setIsLoading(false);
     }

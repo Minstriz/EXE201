@@ -7,11 +7,15 @@ import React, { useState } from "react";
 function ProductList() {
   const { categories } = useCategories();
   const { products } = useProducts();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const router = useRouter(); // Khai báo useRouter
-  const [selectedCategory] = useState<string | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const uniqueCategories = Array.from(new Set(categories));
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const filteredProducts = selectedCategory
     ? products.filter((product) => product.category === selectedCategory)
     : products;

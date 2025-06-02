@@ -1,22 +1,20 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
-import { User as UserIcon, Mail, Phone, MapPin, Package, ChevronRight } from "lucide-react";
+import { User as UserIcon, Mail, Phone, MapPin, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { X } from "lucide-react";
 import Image from "next/image";
-import type { User } from "@/app/context/AuthContext";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface Order {
-  id: number;
+  _id: string;
   userId: string;
   totalAmount: number;
   status: string;
@@ -34,7 +32,7 @@ interface Order {
 }
 
 export default function ProfilePage() {
-  const { user, isAuthenticated, login, updateUser, logout } = useAuth();
+  const { user, isAuthenticated, updateUser, logout } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
@@ -45,13 +43,115 @@ export default function ProfilePage() {
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
   const [filterStatus, setFilterStatus] = useState<string>('all');
 
+  // Add state for form data including address fields
+  const [profileFormData, setProfileFormData] = useState({
+    fullName: user?.fullName || "",
+    email: user?.email || "",
+    phone: user?.phone || "",
+    address: user?.address || "", // Add address field
+    city: user?.city || "",       // Add city field
+    province: user?.province || "", // Add province field
+  });
+
+  // Update form data when user context changes
+  useEffect(() => {
+    if (user) {
+      setProfileFormData({
+        fullName: user.fullName || "",
+        email: user.email || "",
+        phone: user.phone || "",
+        address: user.address || "",
+        city: user.city || "",
+        province: user.province || "",
+      });
+    } else {
+       // Clear form data if user logs out
+       setProfileFormData({
+          fullName: "",
+          email: "",
+          phone: "",
+          address: "",
+          city: "",
+          province: "",
+       });
+    }
+  }, [user]);
+
+  // Function to fetch user profile data
+  const fetchUserProfile = useCallback(async () => {
+    if (!user?._id) {
+      console.log("User ID not available, cannot fetch profile.");
+      return;
+    }
+    try {
+      console.log("Fetching profile data for user ID:", user._id);
+      const response = await fetch(`/api/admin/users/${user._id}`);
+      if (!response.ok) throw new Error("Failed to fetch user profile");
+      const data = await response.json();
+      console.log("Fetched user profile data:", data);
+      // Update user state in AuthContext with the latest data
+      updateUser(data);
+       // Update profile form data with the latest data inside this function
+       // This happens only when fetchUserProfile is called
+       setProfileFormData({
+          fullName: data.fullName || "",
+          email: data.email || "",
+          phone: data.phone || "",
+          address: data.address || "",
+          city: data.city || "",
+          province: data.province || "",
+       });
+    } catch (error: unknown) {
+      console.error("Error fetching user profile:", error);
+      toast.error("Không thể tải thông tin tài khoản");
+    }
+  }, [user?._id, updateUser, setProfileFormData]); // Add dependencies for useCallback
+
+  // Ref to store the latest version of fetchUserProfile
+  const fetchUserProfileRef = useRef(fetchUserProfile);
+
+  // Keep the ref updated whenever fetchUserProfile changes
+  useEffect(() => {
+    fetchUserProfileRef.current = fetchUserProfile;
+  }, [fetchUserProfile]);
+
+  const fetchOrders = useCallback(async () => {
+    if (!user) {
+      console.log("User not available, cannot fetch orders.");
+      return;
+    }
+    try {
+      console.log("Fetching orders for user ID:", user._id);
+      const response = await fetch(`/api/orders?userId=${user._id}`);
+      if (!response.ok) throw new Error("Failed to fetch orders");
+      const data = await response.json();
+      console.log("Fetched orders data for profile:", data);
+      setOrders(data);
+    } catch (error: unknown) {
+      console.error("Error fetching orders:", error);
+      toast.error("Không thể tải lịch sử đơn hàng");
+    }
+  }, [user, setOrders]); // Add dependencies for useCallback
+
+  // Initial fetch of user profile data on mount
   useEffect(() => {
     setIsClient(true);
     const tab = searchParams.get("tab");
     if (tab === "orders") {
       setActiveTab("orders");
+    } else {
+       // Set activeTab to 'profile' if no tab param or not 'orders'
+       setActiveTab("profile");
     }
-  }, [searchParams]);
+    // Initial fetch: only call fetchUserProfile if user is initially available and component is client-side
+    // This useEffect should run only once on mount, or when user changes significantly (e.g., login/logout)
+    // Removed fetchUserProfile from this dependency array to prevent loop triggered by updateUser
+    if (user?._id && isClient) { 
+       console.log("Initial user available, fetching profile once...");
+       fetchUserProfileRef.current(); // Call via ref
+    }
+     // Removed fetchUserProfile from dependencies here.
+  }, [user?._id, isAuthenticated, isClient, searchParams]); // Removed fetchUserProfile from dependencies
 
   useEffect(() => {
     if (isClient && !isAuthenticated) {
@@ -63,24 +163,12 @@ export default function ProfilePage() {
     if (user && activeTab === "orders") {
       fetchOrders();
     }
-  }, [user, activeTab]);
+  }, [user, activeTab, fetchOrders]); // Add fetchOrders to dependencies
 
-  const fetchOrders = async () => {
-    try {
-      const response = await fetch(`/api/orders?userId=${user?.id}`);
-      if (!response.ok) throw new Error("Failed to fetch orders");
-      const data = await response.json();
-      setOrders(data);
-    } catch (error) {
-      toast.error("Không thể tải lịch sử đơn hàng");
-    }
-  };
-
-  const handleInputChange = (field: keyof User, value: string) => {
-    if (!user) return;
-    // Create a temporary updated user object for input state
-    updateUser({
-      ...user,
+  // Update handler to use profileFormData state
+  const handleProfileInputChange = (field: keyof typeof profileFormData, value: string) => {
+    setProfileFormData({
+      ...profileFormData,
       [field]: value,
     });
   };
@@ -92,6 +180,9 @@ export default function ProfilePage() {
     setIsLoading(true);
 
     try {
+      // Add console log to inspect data before sending
+      console.log("Data being sent to updateAddress API:", profileFormData);
+
       // Call the centralized update API endpoint
       const response = await fetch("/api/users/updateAddress", {
         method: "PUT",
@@ -99,13 +190,13 @@ export default function ProfilePage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          userId: user.id, // Send the user ID
-          fullName: user.fullName,
-          email: user.email,
-          phone: user.phone,
-          address: user.address, // Include address, city, province
-          city: user.city,
-          province: user.province,
+          userId: user._id,
+          fullName: profileFormData.fullName,
+          email: profileFormData.email,
+          phone: profileFormData.phone,
+          address: profileFormData.address,
+          city: profileFormData.city,
+          province: profileFormData.province,
         }),
       });
 
@@ -115,11 +206,11 @@ export default function ProfilePage() {
       }
 
       const updatedUser = await response.json();
-      updateUser(updatedUser.user); // Update context state with the user object from the response
+      updateUser(updatedUser.user);
       toast.success("Thông tin tài khoản đã được cập nhật");
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error updating profile:", error);
-      toast.error(error.message || "Cập nhật thông tin tài khoản thất bại");
+      toast.error((error as Error).message || "Cập nhật thông tin tài khoản thất bại");
     } finally {
       setIsLoading(false);
     }
@@ -128,6 +219,14 @@ export default function ProfilePage() {
   const handleLogout = () => {
     logout();
     router.push("/");
+  };
+
+  // Handler for sorting orders
+  const handleSortOrderChange = (value: string) => {
+    // Ensure the value is either 'newest' or 'oldest'
+    if (value === 'newest' || value === 'oldest') {
+      setSortOrder(value);
+    }
   };
 
   const filteredAndSortedOrders = useMemo(() => {
@@ -218,8 +317,8 @@ export default function ProfilePage() {
                       <UserIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                       <Input
                         type="text"
-                        value={user?.fullName || ""}
-                        onChange={(e) => handleInputChange("fullName", e.target.value)}
+                        value={profileFormData.fullName}
+                        onChange={(e) => handleProfileInputChange("fullName", e.target.value)}
                         className="pl-10"
                         required
                       />
@@ -234,8 +333,8 @@ export default function ProfilePage() {
                       <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                       <Input
                         type="email"
-                        value={user?.email || ""}
-                        onChange={(e) => handleInputChange("email", e.target.value)}
+                        value={profileFormData.email}
+                        onChange={(e) => handleProfileInputChange("email", e.target.value)}
                         className="pl-10"
                         required
                       />
@@ -250,39 +349,26 @@ export default function ProfilePage() {
                       <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                       <Input
                         type="tel"
-                        value={user?.phone || ""}
-                        onChange={(e) => handleInputChange("phone", e.target.value)}
+                        value={profileFormData.phone}
+                        onChange={(e) => handleProfileInputChange("phone", e.target.value)}
                         className="pl-10"
                         required
                       />
                     </div>
                   </div>
 
-                  <div className="space-y-2">
+                  {/* Add Address Fields */}
+                   <div className="space-y-2">
                     <label className="text-sm font-medium text-gray-700">
-                      Địa chỉ
+                      Địa chỉ chi tiết
                     </label>
                     <div className="relative">
                       <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                       <Input
                         type="text"
-                        value={user?.address || ""}
-                        onChange={(e) => handleInputChange("address", e.target.value)}
-                        className="pl-10"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700">
-                      Thành phố
-                    </label>
-                    <div className="relative">
-                      <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                      <Input
-                        type="text"
-                        value={user?.city || ""}
-                        onChange={(e) => handleInputChange("city", e.target.value)}
+                        placeholder="Số nhà, tên đường..."
+                        value={profileFormData.address}
+                        onChange={(e) => handleProfileInputChange("address", e.target.value)}
                         className="pl-10"
                       />
                     </div>
@@ -293,34 +379,40 @@ export default function ProfilePage() {
                       Tỉnh/Thành phố
                     </label>
                     <div className="relative">
-                      <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                       {/* You might want a Select component here for a real app */}
+                       <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                       <Input
                         type="text"
-                        value={user?.province || ""}
-                        onChange={(e) => handleInputChange("province", e.target.value)}
+                         placeholder="Ví dụ: Hồ Chí Minh"
+                        value={profileFormData.province}
+                        onChange={(e) => handleProfileInputChange("province", e.target.value)}
                         className="pl-10"
                       />
                     </div>
                   </div>
+
+                   <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700">
+                      Thành phố/Quận/Huyện
+                    </label>
+                    <div className="relative">
+                       {/* You might want a Select component here for a real app, possibly dependent on Province selection */}
+                       <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                      <Input
+                        type="text"
+                         placeholder="Ví dụ: Quận 1"
+                        value={profileFormData.city}
+                        onChange={(e) => handleProfileInputChange("city", e.target.value)}
+                        className="pl-10"
+                      />
+                    </div>
+                  </div>
+
                 </div>
 
-                <div className="flex justify-end space-x-4">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={handleLogout}
-                    className="hover:bg-red-50 hover:text-red-600"
-                  >
-                    Đăng xuất
-                  </Button>
-                  <Button
-                    type="submit"
-                    disabled={isLoading}
-                    className="bg-[#219EBC] hover:bg-[#197ba3]"
-                  >
-                    {isLoading ? "Đang cập nhật..." : "Cập nhật thông tin"}
-                  </Button>
-                </div>
+                <Button type="submit" className="bg-[#219EBC] text-white hover:bg-[#1b89a0]" disabled={isLoading}>
+                  {isLoading ? "ĐANG LƯU..." : "Cập nhật thông tin"}
+                </Button>
               </motion.form>
             ) : (
               <motion.div
@@ -328,180 +420,145 @@ export default function ProfilePage() {
                 animate={{ opacity: 1, y: 0 }}
                 className="space-y-6"
               >
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-bold">Lịch sử mua hàng</h2>
-                  <div className="flex items-center space-x-4">
-                    <Select
-                      value={sortOrder}
-                      onValueChange={(value: "newest" | "oldest") => setSortOrder(value)}
-                    >
-                      <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Sắp xếp theo" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="newest">Mới nhất</SelectItem>
-                        <SelectItem value="oldest">Cũ nhất</SelectItem>
-                      </SelectContent>
+                <h3 className="text-lg font-semibold text-gray-800">Lịch sử đơn hàng</h3>
+
+                 {/* Order Filter and Sort */}
+                 <div className="flex items-center space-x-4 mb-4">
+                    <Select value={filterStatus} onValueChange={setFilterStatus}>
+                       <SelectTrigger className="w-[180px]">
+                          <SelectValue placeholder="Trạng thái đơn hàng" />
+                       </SelectTrigger>
+                       <SelectContent>
+                          <SelectItem value="all">Tất cả trạng thái</SelectItem>
+                          <SelectItem value="pending">Đang xử lý</SelectItem>
+                          <SelectItem value="delivered">Đã giao</SelectItem>
+                          <SelectItem value="cancelled">Đã hủy</SelectItem>
+                       </SelectContent>
                     </Select>
 
-                    <Select
-                      value={filterStatus}
-                      onValueChange={(value: string) => setFilterStatus(value)}
-                    >
-                      <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Lọc theo trạng thái" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">Tất cả trạng thái</SelectItem>
-                        <SelectItem value="pending">Đang xử lý</SelectItem>
-                        <SelectItem value="delivered">Đã giao</SelectItem>
-                        <SelectItem value="cancelled">Đã hủy</SelectItem>
-                      </SelectContent>
+                     <Select value={sortOrder} onValueChange={handleSortOrderChange}>
+                       <SelectTrigger className="w-[180px]">
+                          <SelectValue placeholder="Sắp xếp" />
+                       </SelectTrigger>
+                       <SelectContent>
+                          <SelectItem value="newest">Mới nhất</SelectItem>
+                          <SelectItem value="oldest">Cũ nhất</SelectItem>
+                       </SelectContent>
                     </Select>
-                  </div>
-                </div>
-                {filteredAndSortedOrders.length === 0 ? (
-                  <p className="text-gray-500">Chưa có đơn hàng nào</p>
-                ) : (
+                 </div>
+
+                {filteredAndSortedOrders.length > 0 ? (
                   <div className="space-y-4">
                     {filteredAndSortedOrders.map((order) => (
                       <div
-                        key={order.id}
-                        className="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow"
+                        key={order._id}
+                        className="border rounded-lg p-4 hover:shadow-md transition-shadow duration-200 cursor-pointer"
+                        onClick={() => setSelectedOrder(order)}
                       >
-                        <div className="flex justify-between items-start mb-4">
+                        <div className="flex justify-between items-center">
                           <div>
-                            <p className="font-medium">Mã đơn hàng: #{order.id}</p>
-                            <p className="text-sm text-gray-500">
-                              Ngày đặt: {new Date(order.createdAt).toLocaleDateString()}
-                            </p>
-                            <p className="text-sm text-gray-500">
-                              {order.items.length} sản phẩm
-                            </p>
+                            <p className="font-semibold">Đơn hàng #{order._id}</p>
+                            <p className="text-sm text-gray-600">Ngày đặt: {new Date(order.createdAt).toLocaleDateString()}</p>
                           </div>
-                          <div className="flex items-center gap-4">
-                            <span
-                              className={`px-2 py-1 rounded text-sm ${
-                                order.status === "delivered"
-                                  ? "bg-green-100 text-green-800"
-                                  : order.status === "pending"
-                                  ? "bg-yellow-100 text-yellow-800"
-                                  : "bg-red-100 text-red-800"
-                              }`}
-                            >
-                              {order.status === "delivered"
-                                ? "Đã giao"
-                                : order.status === "pending"
-                                ? "Đang xử lý"
-                                : "Đã hủy"}
-                            </span>
-                            <button
-                              onClick={() => setSelectedOrder(order)}
-                              className="flex items-center gap-1 text-blue-600 hover:text-blue-800"
-                            >
-                              Chi tiết
-                              <ChevronRight className="w-4 h-4" />
-                            </button>
+                          <div className={`font-medium ${order.status === 'delivered' ? 'text-green-600' : order.status === 'cancelled' ? 'text-red-600' : order.status === 'paid' ? 'text-blue-600' : order.status === 'failed' ? 'text-orange-600' : 'text-yellow-600'}`}>
+                            {order.status === 'pending' ? 'Đang xử lý' : order.status === 'delivered' ? 'Đã giao' : order.status === 'cancelled' ? 'Đã hủy' : order.status === 'paid' ? 'Đã thanh toán' : 'Thanh toán thất bại'}
                           </div>
                         </div>
-                        <div className="flex justify-between items-center pt-4 border-t">
-                          <span className="font-medium">Tổng tiền:</span>
-                          <span className="font-bold">
-                            {order.totalAmount.toLocaleString()} VNĐ
-                          </span>
+                        <div className="flex justify-between items-center mt-2">
+                           <p className="text-sm text-gray-700">Tổng tiền: {order.totalAmount.toLocaleString()} VNĐ</p>
+                           <ChevronRight className="text-gray-500" size={20} />
                         </div>
                       </div>
                     ))}
                   </div>
+                ) : (
+                  <p className="text-gray-600">Bạn chưa có đơn hàng nào.</p>
                 )}
               </motion.div>
             )}
           </div>
         </div>
-      </motion.div>
 
-      {/* Order Details Dialog */}
-      <Dialog open={!!selectedOrder} onOpenChange={() => setSelectedOrder(null)}>
-        <DialogContent className="max-w-3xl">
-          <DialogHeader>
-            <DialogTitle>
-              Chi tiết đơn hàng #{selectedOrder?.id}
-            </DialogTitle>
-          </DialogHeader>
-          {selectedOrder && (
-            <div className="space-y-6">
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <p className="text-gray-500">Ngày đặt:</p>
-                  <p className="font-medium">
-                    {new Date(selectedOrder.createdAt).toLocaleDateString()}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-gray-500">Trạng thái:</p>
-                  <p
-                    className={`font-medium ${
-                      selectedOrder.status === "delivered"
-                        ? "text-green-600"
-                        : selectedOrder.status === "pending"
-                        ? "text-yellow-600"
-                        : "text-red-600"
-                    }`}
-                  >
-                    {selectedOrder.status === "delivered"
-                      ? "Đã giao"
-                      : selectedOrder.status === "pending"
-                      ? "Đang xử lý"
-                      : "Đã hủy"}
-                  </p>
-                </div>
-              </div>
+        {/* Order Detail Dialog */}
+         <Dialog open={!!selectedOrder} onOpenChange={() => setSelectedOrder(null)}>
+            <DialogContent className="max-w-3xl">
+               <DialogHeader>
+                  <DialogTitle>Chi tiết đơn hàng #{selectedOrder?._id}</DialogTitle>
+               </DialogHeader>
+               {selectedOrder && (
+                  <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-4">
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        <div>
+                           <p className="text-gray-500">Ngày đặt:</p>
+                           <p className="font-medium">{new Date(selectedOrder.createdAt).toLocaleDateString()}</p>
+                        </div>
+                         <div>
+                           <p className="text-gray-500">Trạng thái:</p>
+                           <p className={`font-medium ${selectedOrder.status === 'delivered' ? 'text-green-600' : selectedOrder.status === 'cancelled' ? 'text-red-600' : selectedOrder.status === 'paid' ? 'text-blue-600' : selectedOrder.status === 'failed' ? 'text-orange-600' : 'text-yellow-600'}`}>
+                              {selectedOrder.status === 'pending' ? 'Đang xử lý' : selectedOrder.status === 'delivered' ? 'Đã giao' : selectedOrder.status === 'cancelled' ? 'Đã hủy' : selectedOrder.status === 'paid' ? 'Đã thanh toán' : 'Thanh toán thất bại'}
+                           </p>
+                        </div>
+                          {/* Add paymentId if available */}
+                          {selectedOrder.paymentId && (
+                            <div>
+                              <p className="text-gray-500">Mã thanh toán:</p>
+                              <p className="font-medium">{selectedOrder.paymentId}</p>
+                            </div>
+                          )}
+                     </div>
 
-              <div className="space-y-4">
-                <h3 className="font-medium">Sản phẩm</h3>
-                <div className="space-y-4">
-                  {selectedOrder.items.map((item) => (
-                    <div
-                      key={item.id}
-                      className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg"
-                    >
-                      <div className="relative w-20 h-20">
-                        <Image
-                          src={item.image}
-                          alt={item.name}
-                          fill
-                          className="object-cover rounded"
-                        />
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-medium">{item.name}</p>
-                        <p className="text-sm text-gray-500">
-                          Số lượng: {item.quantity}
-                        </p>
-                        <p className="text-sm font-medium">
-                          {item.price.toLocaleString()} VNĐ
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-medium">
-                          {(item.price * item.quantity).toLocaleString()} VNĐ
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+                     <div className="space-y-3">
+                        <h4 className="font-medium text-gray-700">Sản phẩm</h4>
+                         <div className="space-y-3">
+                           {selectedOrder.items.map(item => (
+                              <div key={item.id} className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
+                                 <div className="relative w-16 h-16 flex-shrink-0">
+                                    <Image src={item.image} alt={item.name} fill className="object-cover rounded" />
+                                 </div>
+                                 <div className="flex-1">
+                                    <p className="font-medium text-sm">{item.name}</p>
+                                    <p className="text-xs text-gray-500">Số lượng: {item.quantity}</p>
+                                    <p className="text-xs font-medium">{item.price.toLocaleString()} VNĐ</p>
+                                 </div>
+                                 <div className="text-right text-sm font-medium">
+                                    {(item.price * item.quantity).toLocaleString()} VNĐ
+                                 </div>
+                              </div>
+                           ))}
+                         </div>
+                     </div>
 
-              <div className="flex justify-between items-center pt-4 border-t">
-                <span className="text-lg font-medium">Tổng tiền:</span>
-                <span className="text-xl font-bold">
-                  {selectedOrder.totalAmount.toLocaleString()} VNĐ
-                </span>
-              </div>
+                     <div className="flex justify-between items-center pt-4 border-t">
+                        <span className="text-lg font-semibold">Tổng tiền:</span>
+                        <span className="text-xl font-bold text-[#219EBC]">{selectedOrder.totalAmount.toLocaleString()} VNĐ</span>
+                     </div>
+
+                     {/* Add User Info / Shipping Address if available in Order object */}
+                      {/* Example: If your Order model includes shippingAddress */}
+                      {/* selectedOrder.shippingAddress && (
+                         <div className="space-y-2 pt-4 border-t">
+                            <h4 className="font-medium text-gray-700">Địa chỉ giao hàng</h4>
+                            <p className="text-sm text-gray-600">{selectedOrder.shippingAddress.fullName}</p>
+                            <p className="text-sm text-gray-600">{selectedOrder.shippingAddress.phone}</p>
+                            <p className="text-sm text-gray-600">{selectedOrder.shippingAddress.address}, {selectedOrder.shippingAddress.city}, {selectedOrder.shippingAddress.province}</p>
+                         </div>
+                      ) */}
+
+                  </div>
+               )}
+            </DialogContent>
+         </Dialog>
+
+         {/* Logout Button */}
+         {isClient && isAuthenticated && (
+            <div className="max-w-4xl mx-auto mt-6 text-right">
+               <Button onClick={handleLogout} className="bg-red-500 text-white hover:bg-red-600">
+                  Đăng xuất
+               </Button>
             </div>
-          )}
-        </DialogContent>
-      </Dialog>
+         )}
+
+      </motion.div>
     </div>
   );
 } 

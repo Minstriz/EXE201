@@ -6,7 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useCart } from "@/app/context/CartContext";
 import { CartSidebar } from "./CartSidebar";
-import { ShoppingBag, User, Menu, Search, ShoppingCart, UserCircle } from "lucide-react";
+import { Menu, ShoppingCart, UserCircle, Search } from "lucide-react";
 import { useAuth } from "@/app/context/AuthContext";
 import { toast } from "sonner";
 
@@ -18,6 +18,7 @@ function NavBar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
+  // eslint-disable-next-line
   const { user, isAuthenticated, logout, isLoading } = useAuth();
 
   useEffect(() => {
@@ -109,8 +110,16 @@ function NavBar() {
                       <Link
                         href="/profile"
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        onClick={() => setIsUserMenuOpen(false)}
                       >
                         Tài khoản của tôi
+                      </Link>
+                      <Link
+                        href="/profile?tab=orders"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        onClick={() => setIsUserMenuOpen(false)}
+                      >
+                        Lịch sử mua hàng
                       </Link>
                       <button
                         onClick={handleLogout}

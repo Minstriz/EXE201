@@ -1,47 +1,41 @@
-import { NextResponse, NextRequest } from 'next/server';
-import fs from 'fs';
-import path from 'path';
+import { NextResponse } from 'next/server';
+// Removed fs and path imports as we will use Mongoose
+// import fs from 'fs';
+// import path from 'path';
+// Removed uuid import as we will use Mongoose for ID generation
+// import { v4 as uuidv4 } from 'uuid';
 
-const usersFilePath = path.join(process.cwd(), 'data', 'users.json');
+import dbConnect from '@/lib/mongodb';
+import User from '@/models/User';
+
+// Removed usersFilePath constant
+// const usersFilePath = path.join(process.cwd(), 'data', 'users.json');
 
 export async function GET() {
+  await dbConnect();
   try {
-    const fileContents = fs.readFileSync(usersFilePath, 'utf8');
-    const data = JSON.parse(fileContents);
-    return NextResponse.json(data.users);
+    // Fetch users from MongoDB using Mongoose model
+    const users = await User.find({});
+    return NextResponse.json(users, { status: 200 });
   } catch (error) {
-    console.error('Error reading users file:', error);
-    return NextResponse.json({ message: 'Error fetching users' }, { status: 500 });
+    console.error('Error fetching users:', error);
+    return NextResponse.json({ message: (error as Error).message }, { status: 500 });
   }
 }
 
-export async function POST(req: NextRequest) {
+export async function POST(request: Request) {
+  await dbConnect();
   try {
-    const newUser = await req.json();
-
-    // Read existing data
-    const fileContents = fs.readFileSync(usersFilePath, 'utf8');
-    const data = JSON.parse(fileContents);
-
-    // Find the maximum numeric ID and generate the next one
-    let maxId = 0;
-    data.users.forEach((user: any) => {
-      const numericId = parseInt(user.id, 10);
-      if (!isNaN(numericId) && numericId > maxId) {
-        maxId = numericId;
-      }
-    });
-    const newId = (maxId + 1).toString(); // Generate next ID and keep it as string
-
-    // Add new user with generated ID
-    data.users.push({ id: newId, ...newUser });
-
-    // Write updated data back
-    fs.writeFileSync(usersFilePath, JSON.stringify(data, null, 2), 'utf8');
-
-    return NextResponse.json({ message: 'User added successfully', user: { id: newId, ...newUser } }, { status: 201 });
+    const body = await request.json();
+    // Mongoose will automatically generate an _id (ObjectId)
+    const newUser = await User.create(body);
+    return NextResponse.json(newUser, { status: 201 });
   } catch (error) {
     console.error('Error adding user:', error);
-    return NextResponse.json({ message: 'Error adding user' }, { status: 500 });
+    // Handle duplicate key error (e.g., duplicate username or email)
+    if (error.code === 11000) {
+       return NextResponse.json({ message: 'Username or Email already exists' }, { status: 400 });
+    }
+    return NextResponse.json({ message: (error as Error).message }, { status: 500 });
   }
 } 

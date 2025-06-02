@@ -1,61 +1,69 @@
-import { NextResponse, NextRequest } from 'next/server';
-import fs from 'fs';
-import path from 'path';
+import { NextRequest, NextResponse } from 'next/server';
+import connectDB from '@/lib/mongodb';
+import Order from '@/models/Order';
+import mongoose from 'mongoose';
 
-const ordersFilePath = path.join(process.cwd(), 'data', 'orders.json');
+type RouteContext = {
+  params: {
+    orderId: string;
+  };
+};
 
-export async function PUT(req: NextRequest, { params }: { params: { orderId: string } }) {
+export async function GET(request: NextRequest, context: RouteContext) {
+  await connectDB();
+  const { orderId } = context.params;
+
+  if (!mongoose.Types.ObjectId.isValid(orderId)) {
+    return NextResponse.json({ message: 'Invalid Order ID' }, { status: 400 });
+  }
+
   try {
-    const { orderId } = params;
-    const updatedOrderData = await req.json();
-
-    // Read existing data
-    const fileContents = fs.readFileSync(ordersFilePath, 'utf8');
-    const data = JSON.parse(fileContents);
-
-    // Find the order and update
-    const orderIndex = data.orders.findIndex((order: any) => order.id.toString() === orderId);
-    if (orderIndex === -1) {
+    const order = await Order.findById(orderId);
+    if (!order) {
       return NextResponse.json({ message: 'Order not found' }, { status: 404 });
     }
-
-    // Only allow updating the 'status' field for now
-    if (updatedOrderData.status) {
-      data.orders[orderIndex].status = updatedOrderData.status;
-    }
-
-    // Write updated data back
-    fs.writeFileSync(ordersFilePath, JSON.stringify(data, null, 2), 'utf8');
-
-    return NextResponse.json({ message: 'Order updated successfully', order: data.orders[orderIndex] });
+    return NextResponse.json(order, { status: 200 });
   } catch (error) {
-    console.error('Error updating order:', error);
-    return NextResponse.json({ message: 'Error updating order' }, { status: 500 });
+    return NextResponse.json({ message: (error as Error).message }, { status: 500 });
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { orderId: string } }) {
+// Các hàm PUT, DELETE cũng tương tự:
+export async function PUT(request: NextRequest, context: RouteContext) {
+  await connectDB();
+  const { orderId } = context.params;
+
+  if (!mongoose.Types.ObjectId.isValid(orderId)) {
+    return NextResponse.json({ message: 'Invalid Order ID' }, { status: 400 });
+  }
+
   try {
-    const { orderId } = params;
-
-    // Read existing data
-    const fileContents = fs.readFileSync(ordersFilePath, 'utf8');
-    const data = JSON.parse(fileContents);
-
-    // Filter out the order to delete
-    const initialLength = data.orders.length;
-    data.orders = data.orders.filter((order: any) => order.id.toString() !== orderId);
-
-    if (data.orders.length === initialLength) {
+    const body = await request.json();
+    const updatedOrder = await Order.findByIdAndUpdate(orderId, body, { new: true, runValidators: true });
+    if (!updatedOrder) {
       return NextResponse.json({ message: 'Order not found' }, { status: 404 });
     }
-
-    // Write updated data back
-    fs.writeFileSync(ordersFilePath, JSON.stringify(data, null, 2), 'utf8');
-
-    return NextResponse.json({ message: 'Order deleted successfully' });
+    return NextResponse.json(updatedOrder, { status: 200 });
   } catch (error) {
-    console.error('Error deleting order:', error);
-    return NextResponse.json({ message: 'Error deleting order' }, { status: 500 });
+    return NextResponse.json({ message: (error as Error).message }, { status: 400 });
   }
-} 
+}
+
+export async function DELETE(request: NextRequest, context: RouteContext) {
+  await connectDB();
+  const { orderId } = context.params;
+
+  if (!mongoose.Types.ObjectId.isValid(orderId)) {
+    return NextResponse.json({ message: 'Invalid Order ID' }, { status: 400 });
+  }
+
+  try {
+    const deletedOrder = await Order.findByIdAndDelete(orderId);
+    if (!deletedOrder) {
+      return NextResponse.json({ message: 'Order not found' }, { status: 404 });
+    }
+    return NextResponse.json({ message: 'Order deleted successfully' }, { status: 200 });
+  } catch (error) {
+    return NextResponse.json({ message: (error as Error).message }, { status: 500 });
+  }
+}

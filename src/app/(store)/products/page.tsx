@@ -8,17 +8,26 @@ import { useCart } from "@/app/context/CartContext";
 import Image from "next/image";
 import { toast } from "sonner";
 
+interface Product {
+  id: number; // Assuming id is number for now based on previous JSON data
+  name: string;
+  price: number;
+  image: string;
+  category: string;
+  // Add other fields as needed
+}
+
 function ProductPage() {
   const { categories } = useCategories();
   const { products, loading: loadingProducts } = useProducts();
   const { addToCart } = useCart();
 
-  const groupedProducts = categories.reduce((acc: any, category: string) => {
-    acc[category] = products.filter((p) => p.category === category);
+  const groupedProducts = categories.reduce((acc: { [key: string]: Product[] }, category: string) => {
+    acc[category] = products.filter((p: Product) => p.category === category);
     return acc;
   }, {});
 
-  const handleAddToCart = (product: any) => {
+  const handleAddToCart = (product: Product) => {
     addToCart({
       id: product.id,
       name: product.name,
@@ -113,7 +122,7 @@ function ProductPage() {
             <div className="w-full flex justify-center">
               <div className="max-w-[1200px] w-full">
                 <Slider {...sliderSettings}>
-                  {groupedProducts[category].map((product: any) => (
+                  {groupedProducts[category].map((product: Product) => (
                     <div key={product.id} className="px-2">
                       <div className="relative bg-white rounded-md transition transform hover:-translate-y-1">
                         <Image
