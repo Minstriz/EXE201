@@ -30,7 +30,7 @@ export async function POST(request: Request) {
     const orderType = "other";
     const locale = "vn";
     const currCode = "VND";
-    const vnp_Params: any = {};
+    const vnp_Params: { [key: string]: string | number } = {};
     vnp_Params['vnp_Version'] = '2.1.0';
     vnp_Params['vnp_Command'] = 'pay';
     vnp_Params['vnp_TmnCode'] = vnp_TmnCode;
@@ -47,7 +47,7 @@ export async function POST(request: Request) {
     // Sắp xếp các tham số theo thứ tự a-z và tạo chuỗi ký tự để ký
     const sortedParams = Object.keys(vnp_Params)
       .sort()
-      .reduce((acc: any, key) => {
+      .reduce((acc: { [key: string]: string | number }, key) => {
         acc[key] = vnp_Params[key];
         return acc;
       }, {});
@@ -73,15 +73,20 @@ export async function POST(request: Request) {
     console.log("Final vnp_Params:", vnp_Params);
 
     // Tạo URL thanh toán - URLSearchParams tự động encode giá trị
-    const vnpUrl = `${vnp_Url}?${new URLSearchParams(vnp_Params).toString()}`;
+    const stringifiedParams: Record<string, string> = {};
+    Object.keys(vnp_Params).forEach(key => {
+      stringifiedParams[key] = String(vnp_Params[key]);
+    });
+    const vnpUrl = `${vnp_Url}?${new URLSearchParams(stringifiedParams).toString()}`;
 
     console.log("Redirecting to:", vnpUrl);
 
     return NextResponse.json({ paymentUrl: vnpUrl });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error creating payment:", error);
+    const errorMessage = error instanceof Error ? error.message : "Failed to create payment";
     return NextResponse.json(
-      { error: error.message || "Failed to create payment" },
+      { error: errorMessage },
       { status: 500 }
     );
   }

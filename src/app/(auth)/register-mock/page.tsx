@@ -21,6 +21,7 @@ export default function RegisterPage() {
     confirmPassword: "",
     fullName: "",
     email: "",
+    phone: "",
   });
   const [isLoading, setIsLoading] = useState(false);
 
@@ -36,19 +37,11 @@ export default function RegisterPage() {
     }
 
     try {
-      // Check if username already exists
-      const checkResponse = await fetch("http://localhost:3001/users");
-      const users = await checkResponse.json();
-      const existingUser = users.find((user: any) => user.username === formData.username);
+      // Remove frontend check for existing username
+      // The backend API /api/auth/register now handles checking for existing email/username
 
-      if (existingUser) {
-        toast.error("Tên đăng nhập đã tồn tại");
-        setIsLoading(false);
-        return;
-      }
-
-      // Create new user
-      const response = await fetch("http://localhost:3001/users", {
+      // Call the new backend API route for registration
+      const response = await fetch("/api/auth/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -58,19 +51,42 @@ export default function RegisterPage() {
           password: formData.password,
           fullName: formData.fullName,
           email: formData.email,
+          phone: formData.phone,
+          // Include other fields if your form collects them, e.g., address, city, province
+          // address: formData.address,
+          // city: formData.city,
+          // province: formData.province,
         }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error("Đăng ký thất bại");
+        // Handle specific errors from backend (like duplicate email/username)
+        if (response.status === 400 && data.error) {
+           toast.error(data.error);
+        } else {
+           throw new Error(data.error || "Đăng ký thất bại");
+        }
+         setIsLoading(false);
+         return;
       }
 
-      const newUser = await response.json();
-      login(newUser);
       toast.success("Đăng ký thành công");
-      router.push("/");
-    } catch (error: any) {
-      toast.error(error.message);
+      // Depending on your flow, you might want to auto-login the user or redirect to login page
+      // If your backend returns user data upon successful registration and you want to auto-login:
+       if (data.user) {
+         login(data.user); // Use the user data returned from the backend
+         router.push("/"); // Redirect to home or dashboard
+       } else {
+          // If backend doesn't return user data, redirect to login page
+          router.push("/login-mock"); // Redirect to the login page for manual login
+       }
+
+    } catch (error) {
+      // Type assertion to treat error as Error for its message property
+      console.error("Registration error:", error);
+      toast.error((error as Error).message || "Đã xảy ra lỗi khi đăng ký");
     } finally {
       setIsLoading(false);
     }
@@ -146,6 +162,20 @@ export default function RegisterPage() {
                     value={formData.email}
                     onChange={(e) =>
                       setFormData({ ...formData, email: e.target.value })
+                    }
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-semibold">Số điện thoại</label>
+                  <input
+                    type="tel"
+                    placeholder="0123456789"
+                    className="w-full border p-3 rounded mt-1"
+                    required
+                    value={formData.phone}
+                    onChange={(e) =>
+                      setFormData({ ...formData, phone: e.target.value })
                     }
                   />
                 </div>
@@ -231,4 +261,4 @@ export default function RegisterPage() {
       <Footer />
     </div>
   );
-} 
+}

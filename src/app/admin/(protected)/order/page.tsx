@@ -1,10 +1,8 @@
 "use client";
 
 import { useEffect, useState, useMemo } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import Image from "next/image";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 
 interface OrderItem {
   id: number;
@@ -16,8 +14,8 @@ interface OrderItem {
 }
 
 interface Order {
-  id: number;
-  userId: string;
+  _id: string;
+  userId: { _id: string; fullName: string };
   items: OrderItem[];
   totalAmount: number;
   status: string; // e.g., 'pending', 'delivered', 'cancelled'
@@ -42,9 +40,10 @@ const AdminOrdersPage = () => {
         throw new Error(`Error: ${res.status}`);
       }
       const data = await res.json();
+      console.log("Fetched orders data:", data);
       setOrders(data);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError((err as Error).message);
     } finally {
       setLoading(false);
     }
@@ -54,7 +53,7 @@ const AdminOrdersPage = () => {
     fetchOrders();
   }, []);
 
-  const handleStatusChange = async (orderId: number, newStatus: string) => {
+  const handleStatusChange = async (orderId: string, newStatus: string) => {
     try {
       const res = await fetch(`/api/admin/orders/${orderId}`, {
         method: 'PUT',
@@ -71,9 +70,9 @@ const AdminOrdersPage = () => {
       // Refresh the orders list after successful update
       fetchOrders();
 
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error updating order status:', err);
-      alert(`Failed to update order status: ${err.message}`);
+      alert(`Failed to update order status: ${(err as Error).message}`);
     }
   };
 
@@ -85,6 +84,10 @@ const AdminOrdersPage = () => {
         return 'text-green-600'; // Màu xanh lá
       case 'cancelled':
         return 'text-red-600'; // Màu đỏ
+      case 'paid': // Thêm trạng thái đã thanh toán
+        return 'text-blue-600'; // Màu xanh dương
+      case 'failed': // Thêm trạng thái thanh toán thất bại
+        return 'text-orange-600'; // Màu cam
       default:
         return 'text-gray-800'; // Màu mặc định
     }
@@ -98,8 +101,9 @@ const AdminOrdersPage = () => {
     if (searchTerm) {
       const lowercasedSearchTerm = searchTerm.toLowerCase();
       filteredOrders = filteredOrders.filter(order =>
-        order.id.toString().includes(lowercasedSearchTerm) ||
-        order.userId.toLowerCase().includes(lowercasedSearchTerm)
+        order._id.toLowerCase().includes(lowercasedSearchTerm) ||
+        order.userId._id.toLowerCase().includes(lowercasedSearchTerm) ||
+        order.userId.fullName.toLowerCase().includes(lowercasedSearchTerm)
       );
     }
 
@@ -130,7 +134,7 @@ const AdminOrdersPage = () => {
 
   return (
     <div className="container mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-4">Admin Order Management</h1>
+      <h1 className="text-2xl font-bold mb-4">Đơn hàng</h1>
 
       {/* Search, Sort, and Filter Controls */}
       <div className="flex justify-between items-center mb-4 space-x-4">
@@ -160,6 +164,8 @@ const AdminOrdersPage = () => {
           <option value="pending">Đang xử lý</option>
           <option value="delivered">Đã giao</option>
           <option value="cancelled">Đã hủy</option>
+          <option value="paid">Đã thanh toán</option>
+          <option value="failed">Thanh toán thất bại</option>
         </select>
       </div>
 
@@ -168,8 +174,7 @@ const AdminOrdersPage = () => {
           <thead>
             <tr>
               <th className="py-2 px-4 border-b">Order ID</th>
-              <th className="py-2 px-4 border-b">User ID</th>
-              <th className="py-2 px-4 border-b">Items</th>
+              <th className="py-2 px-4 border-b">Customer</th>
               <th className="py-2 px-4 border-b">Total Amount</th>
               <th className="py-2 px-4 border-b">Status</th>
               <th className="py-2 px-4 border-b">Created At</th>
@@ -178,26 +183,21 @@ const AdminOrdersPage = () => {
           </thead>
           <tbody>
             {filteredAndSortedOrders.map((order) => (
-              <tr key={order.id}>
-                <td className="py-2 px-4 border-b">{order.id}</td>
-                <td className="py-2 px-4 border-b">{order.userId}</td>
-                <td className="py-2 px-4 border-b">
-                  <ul>
-                    {order.items.map((item) => (
-                      <li key={item.id}>{item.name} (x{item.quantity})</li>
-                    ))}
-                  </ul>
-                </td>
+              <tr key={order._id}>
+                <td className="py-2 px-4 border-b">{order._id}</td>
+                <td className="py-2 px-4 border-b">{order.userId?.fullName || order.userId?._id}</td>
                 <td className="py-2 px-4 border-b">{order.totalAmount.toLocaleString()} VND</td>
-                <td className={`py-2 px-4 border-b ${getStatusColor(order.status)}`}>
+                <td className={`py-2 px-4 border-b`}>
                   <select
                     value={order.status}
-                    onChange={(e) => handleStatusChange(order.id, e.target.value)}
+                    onChange={(e) => handleStatusChange(order._id, e.target.value)}
                     className={`border rounded p-1 ${getStatusColor(order.status)}`}
                   >
                     <option value="pending">Đang xử lý</option>
                     <option value="delivered">Đã giao</option>
                     <option value="cancelled">Đã hủy</option>
+                    <option value="paid">Đã thanh toán</option>
+                    <option value="failed">Thanh toán thất bại</option>
                   </select>
                 </td>
                 <td className="py-2 px-4 border-b">{new Date(order.createdAt).toLocaleDateString()}</td>
@@ -219,7 +219,7 @@ const AdminOrdersPage = () => {
         <DialogContent className="max-w-3xl">
           <DialogHeader>
             <DialogTitle>
-              Chi tiết đơn hàng #{selectedOrder?.id}
+              Chi tiết đơn hàng #{selectedOrder?._id}
             </DialogTitle>
           </DialogHeader>
           {selectedOrder && (
@@ -242,7 +242,9 @@ const AdminOrdersPage = () => {
                       ? "Đang xử lý"
                       : selectedOrder.status === "delivered"
                       ? "Đã giao"
-                      : "Đã hủy"}
+                      : selectedOrder.status === "paid"
+                      ? "Đã thanh toán"
+                      : "Thanh toán thất bại"}
                   </p>
                 </div>
               </div>

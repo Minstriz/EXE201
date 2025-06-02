@@ -2,7 +2,6 @@ import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import { FaFacebookF, FaInstagram, FaTiktok } from "react-icons/fa";
-import { FaGlobe } from "react-icons/fa";
 import LanguageToggle from "./LanguageToggle";
 
 function Footer() {

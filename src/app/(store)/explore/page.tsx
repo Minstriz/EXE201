@@ -162,13 +162,13 @@ function ExplorePage() {
                   07/02/2023 10:26:00 -07:00
                 </p>
                 <h2 className="text-md font-bold text-blue-700 mt-2">
-                  "Nhờ đọc các bài viết trên Tuổi Trẻ, tôi càng yêu Sài Gòn -
-                  TP.HCM"
+                  &quot;Nhờ đọc các bài viết trên Tuổi Trẻ, tôi càng yêu Sài Gòn -
+                  TP.HCM&quot;
                 </h2>
                 <p className="text-gray-700 mt-1 text-sm">
-                  "Nhờ đọc rất nhiều bài viết trên báo Tuổi Trẻ - giới thiệu về
+                  &quot;Nhờ đọc rất nhiều bài viết trên báo Tuổi Trẻ - giới thiệu về
                   đất Sài Gòn, về đường phố Sài Gòn, để rồi tôi yêu thương thêm
-                  mảnh đất phương Nam nắng như rót mật này".
+                  mảnh đất phương Nam nắng như rót mật này&quot;.
                 </p>
               </div>
               <Link
@@ -199,7 +199,7 @@ function ExplorePage() {
                   Kinh nghiệm du lịch Sài Gòn siêu chi tiết từ A - Z
                 </h2>
                 <p className="text-gray-700 mt-1 text-sm">
-                  Sài Gòn được mệnh danh là "thành phố không ngủ" với nhịp sống
+                  Sài Gòn được mệnh danh là &quot;thành phố không ngủ&quot; với nhịp sống
                   sôi động, hiện đại. Nơi đây thu hút du khách bởi những di tích
                   lịch sử, văn hóa lâu đời...
                 </p>

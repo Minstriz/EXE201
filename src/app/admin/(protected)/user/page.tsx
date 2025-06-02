@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 interface User {
-  id: string;
+  _id: string;
   username: string;
   email: string;
   fullName?: string;
@@ -35,8 +35,8 @@ const AdminUsersPage = () => {
       }
       const data = await res.json();
       setUsers(data);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError((err as Error).message);
     } finally {
       setLoading(false);
     }
@@ -67,7 +67,7 @@ const AdminUsersPage = () => {
     if (!currentUser) return;
 
     try {
-      const res = await fetch(`/api/admin/users/${currentUser.id}`, {
+      const res = await fetch(`/api/admin/users/${currentUser._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -80,14 +80,14 @@ const AdminUsersPage = () => {
       }
 
       // Find the index of the updated user and replace it in the state
-      setUsers(users.map(user => user.id === currentUser.id ? { ...user, ...editFormData } : user));
+      setUsers(users.map(user => user._id === currentUser._id ? { ...user, ...editFormData } : user));
 
       alert('User updated successfully!'); // Or use toast notification
       setIsEditModalOpen(false); // Close the modal
 
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error updating user:', error);
-      alert(`Failed to update user: ${error.message}`);
+      alert(`Failed to update user: ${(error as Error).message}`);
     }
   };
 
@@ -104,13 +104,13 @@ const AdminUsersPage = () => {
         }
 
         // Remove the deleted user from the state
-        setUsers(users.filter(user => user.id !== userId));
+        setUsers(users.filter(user => user._id !== userId));
 
         alert('User deleted successfully!'); // Or use toast notification
 
-      } catch (error: any) {
+      } catch (error) {
         console.error('Error deleting user:', error);
-        alert(`Failed to delete user: ${error.message}`);
+        alert(`Failed to delete user: ${(error as Error).message}`);
       }
     }
   };
@@ -125,7 +125,7 @@ const AdminUsersPage = () => {
 
   return (
     <div className="container mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-4">Admin User Management</h1>
+      <h1 className="text-2xl font-bold mb-4">Quản lý tài khoản</h1>
       <div className="overflow-x-auto">
         <table className="min-w-full bg-white border border-gray-300">
           <thead>
@@ -135,25 +135,17 @@ const AdminUsersPage = () => {
               <th className="py-2 px-4 border-b">Email</th>
               <th className="py-2 px-4 border-b">Full Name</th>
               <th className="py-2 px-4 border-b">Phone</th>
-              <th className="py-2 px-4 border-b">Address</th>
-              <th className="py-2 px-4 border-b">City</th>
-              <th className="py-2 px-4 border-b">Province</th>
-              <th className="py-2 px-4 border-b">Created At</th>
               <th className="py-2 px-4 border-b">Actions</th>
             </tr>
           </thead>
           <tbody>
             {users.map((user) => (
-              <tr key={user.id}>
-                <td className="py-2 px-4 border-b">{user.id}</td>
+              <tr key={user._id}>
+                <td className="py-2 px-4 border-b">{user._id}</td>
                 <td className="py-2 px-4 border-b">{user.username}</td>
                 <td className="py-2 px-4 border-b">{user.email}</td>
                 <td className="py-2 px-4 border-b">{user.fullName}</td>
                 <td className="py-2 px-4 border-b">{user.phone}</td>
-                <td className="py-2 px-4 border-b">{user.address}</td>
-                <td className="py-2 px-4 border-b">{user.city}</td>
-                <td className="py-2 px-4 border-b">{user.province}</td>
-                <td className="py-2 px-4 border-b">{user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}</td>
                 <td className="py-2 px-4 border-b">
                   {/* Action buttons */}
                   <div className="flex flex-col space-y-2">
@@ -161,10 +153,10 @@ const AdminUsersPage = () => {
                       onClick={() => handleEditUser(user)} // Pass the user object
                       className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm w-full"
                     >
-                      Edit
+                      View Details
                     </button>
                     <button
-                      onClick={() => handleDeleteUser(user.id)}
+                      onClick={() => handleDeleteUser(user._id)}
                       className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded text-sm w-full"
                     >
                       Delete

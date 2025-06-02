@@ -48,8 +48,8 @@ export default function LoginMockPage() {
         icon: '🎉',
       });
       router.push("/");
-    } catch (error: any) {
-      toast.error(error.message, {
+    } catch (error) {
+      toast.error((error as Error).message, {
         style: {
           background: '#ef4444',
           color: 'white',

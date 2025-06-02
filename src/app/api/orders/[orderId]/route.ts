@@ -1,93 +1,57 @@
-import { NextResponse } from "next/server";
-import fs from "fs";
-import path from "path";
+import { NextRequest, NextResponse } from "next/server";
+import connectDB from "@/lib/mongodb";
+import Order from "@/models/Order";
 
-const ordersFilePath = path.join(process.cwd(), "data/orders.json");
-
-// Helper function to read orders
-const readOrders = () => {
-  try {
-    const data = fs.readFileSync(ordersFilePath, "utf8");
-    return JSON.parse(data).orders;
-  } catch (error) {
-    return [];
-  }
-};
-
-// Helper function to write orders
-const writeOrders = (orders: any[]) => {
-  try {
-    fs.writeFileSync(ordersFilePath, JSON.stringify({ orders }, null, 2));
-  } catch (error) {
-    console.error("Error writing orders:", error);
-  }
-};
-
+// GET handler
 export async function GET(
-  request: Request,
-  { params }: { params: { orderId: string } }
+  request: NextRequest,
+  context: { params: Promise<{ orderId: string }> }
 ) {
-  try {
-    const orders = readOrders();
-    const order = orders.find((o: any) => o.id === parseInt(params.orderId));
+  const { orderId } = await context.params;
+  await connectDB();
 
-    if (!order) {
-      return NextResponse.json(
-        { error: "Order not found" },
-        { status: 404 }
-      );
-    }
+  const order = await Order.findById(orderId);
 
-    return NextResponse.json(order);
-  } catch (error) {
-    console.error("Error fetching order:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+  if (!order) {
+    return NextResponse.json({ error: 'Order not found' }, { status: 404 });
   }
+
+  return NextResponse.json(order);
 }
 
+// PUT handler
 export async function PUT(
-  request: Request,
-  { params }: { params: { orderId: string } }
+  request: NextRequest,
+  context: { params: Promise<{ orderId: string }> }
 ) {
+  const { orderId } = await context.params;
+  await connectDB();
+
   try {
     const body = await request.json();
     const { paymentId } = body;
 
     if (!paymentId) {
-      return NextResponse.json(
-        { error: "Payment ID is required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Payment ID is required" }, { status: 400 });
     }
 
-    const orders = readOrders();
-    const orderIndex = orders.findIndex((o: any) => o.id === parseInt(params.orderId));
+    const updatedOrder = await Order.findByIdAndUpdate(
+      orderId,
+      {
+        paymentId,
+        status: "completed",
+        updatedAt: new Date(),
+      },
+      { new: true }
+    );
 
-    if (orderIndex === -1) {
-      return NextResponse.json(
-        { error: "Order not found" },
-        { status: 404 }
-      );
+    if (!updatedOrder) {
+      return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
-    orders[orderIndex] = {
-      ...orders[orderIndex],
-      paymentId,
-      status: "completed",
-      updatedAt: new Date().toISOString()
-    };
-
-    writeOrders(orders);
-
-    return NextResponse.json(orders[orderIndex]);
+    return NextResponse.json(updatedOrder);
   } catch (error) {
     console.error("Error updating order:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
-} 
+}

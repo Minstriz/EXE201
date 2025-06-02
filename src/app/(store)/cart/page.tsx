@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 interface User {
-  id: number;
+  _id: string;
   fullName: string;
   email: string;
   phone: string;
@@ -17,16 +17,9 @@ interface User {
   province?: string;
 }
 
-interface CartItem {
-  id: number;
-  name: string;
-  price: number;
-  quantity: number;
-}
-
 export default function CartPage() {
   const router = useRouter();
-  const { items, removeFromCart, updateQuantity, totalAmount, clearCart } = useCart();
+  const { items, removeFromCart, updateQuantity, totalAmount } = useCart();
   const [user, setUser] = useState<User | null>(null);
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [addressForm, setAddressForm] = useState({
@@ -57,7 +50,7 @@ export default function CartPage() {
     try {
       // Bước 1: Lưu đơn hàng vào data/orders.json thông qua API backend
       const orderData = {
-        userId: user.id.toString(),
+        userId: user._id,
         items: items.map(item => ({
           id: item.id,
           name: item.name,
@@ -81,7 +74,7 @@ export default function CartPage() {
       }
 
       const savedOrder = await saveOrderResponse.json();
-      console.log("Đơn hàng đã được lưu thành công với ID:", savedOrder.id);
+      console.log("Đơn hàng đã được lưu thành công với ID:", savedOrder._id);
 
       // Bước 2: Tạo thanh toán với VNPay sử dụng ID đơn hàng từ backend
       const paymentResponse = await fetch("/api/create-payment", {
@@ -91,7 +84,7 @@ export default function CartPage() {
         },
         body: JSON.stringify({
           amount: totalAmount,
-          orderId: savedOrder.id.toString(), // Sử dụng ID từ backend và convert sang string cho VNPAY
+          orderId: savedOrder._id,
         }),
       });
 
@@ -110,9 +103,9 @@ export default function CartPage() {
       // Bước 3: Chuyển hướng đến trang thanh toán VNPay
       window.location.href = paymentUrl;
 
-    } catch (error: any) {
+    } catch (error) {
       console.error("Lỗi quy trình thanh toán:", error);
-      toast.error(error.message || "Có lỗi xảy ra trong quá trình thanh toán", {
+      toast.error((error as Error).message || "Có lỗi xảy ra trong quá trình thanh toán", {
         style: {
           background: '#ef4444',
           color: 'white',
@@ -133,7 +126,7 @@ export default function CartPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          userId: user?.id,
+          userId: user?._id,
           ...addressForm,
         }),
       });
@@ -153,8 +146,8 @@ export default function CartPage() {
       // Sau khi cập nhật địa chỉ, gọi handlePayment để tiếp tục luồng thanh toán
        handlePayment();
 
-    } catch (error: any) {
-      toast.error(error.message);
+    } catch (error) {
+      toast.error((error as Error).message);
     }
   };
 

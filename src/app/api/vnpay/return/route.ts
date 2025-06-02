@@ -9,12 +9,13 @@ const readOrders = () => {
   try {
     const data = fs.readFileSync(ordersFilePath, "utf8");
     return JSON.parse(data).orders;
-  } catch (error) {
+  } catch {
     return [];
   }
 };
 
 // Helper function to write orders
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const writeOrders = (orders: any[]) => {
   try {
     fs.writeFileSync(ordersFilePath, JSON.stringify({ orders }, null, 2));
@@ -38,7 +39,7 @@ export async function GET(request: Request) {
     }
 
     const orders = readOrders();
-    const orderIndex = orders.findIndex((order: any) => order.id === parseInt(vnp_TxnRef));
+    const orderIndex = orders.findIndex((order: { id: number }) => order.id === parseInt(vnp_TxnRef));
 
     if (orderIndex === -1) {
       return NextResponse.redirect(new URL(`/payment/vnpay-return?${queryString}`, request.url));
