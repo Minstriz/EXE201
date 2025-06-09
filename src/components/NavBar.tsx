@@ -104,6 +104,7 @@ function NavBar() {
                     className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded-full"
                   >
                     <UserCircle className="h-6 w-6 text-gray-500" />
+                    <div>{user?.fullName}</div>
                   </button>
                   {isUserMenuOpen && (
                     <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">

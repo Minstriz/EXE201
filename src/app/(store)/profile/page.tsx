@@ -247,6 +247,30 @@ export default function ProfilePage() {
     });
   }, [orders, sortOrder, filterStatus]);
 
+  // Thêm hàm getStatusColor để đồng bộ màu sắc trạng thái
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return 'text-yellow-600'; // Đang chờ xác nhận - vàng
+      case 'processing':
+        return 'text-purple-600'; // Đang xử lý - tím
+      case 'shipping':
+        return 'text-cyan-600'; // Đang giao hàng - xanh ngọc
+      case 'delivered':
+        return 'text-green-600'; // Đã giao - xanh lá
+      case 'cancelled':
+        return 'text-red-600'; // Đã hủy - đỏ
+      case 'paid':
+        return 'text-blue-600'; // Đã thanh toán - xanh dương
+      case 'failed':
+        return 'text-orange-600'; // Thanh toán thất bại - cam
+      case 'refunded':
+        return 'text-pink-500'; // Đã hoàn tiền - hồng
+      default:
+        return 'text-gray-800'; // Mặc định
+    }
+  };
+
   if (!isClient) {
     return null;
   }
@@ -460,8 +484,24 @@ export default function ProfilePage() {
                             <p className="font-semibold">Đơn hàng #{order._id}</p>
                             <p className="text-sm text-gray-600">Ngày đặt: {new Date(order.createdAt).toLocaleDateString()}</p>
                           </div>
-                          <div className={`font-medium ${order.status === 'delivered' ? 'text-green-600' : order.status === 'cancelled' ? 'text-red-600' : order.status === 'paid' ? 'text-blue-600' : order.status === 'failed' ? 'text-orange-600' : 'text-yellow-600'}`}>
-                            {order.status === 'pending' ? 'Đang xử lý' : order.status === 'delivered' ? 'Đã giao' : order.status === 'cancelled' ? 'Đã hủy' : order.status === 'paid' ? 'Đã thanh toán' : 'Thanh toán thất bại'}
+                          <div className={`font-medium ${getStatusColor(order.status)}`}>
+                            {order.status === 'pending'
+                              ? 'Đang chờ xác nhận'
+                              : order.status === 'processing'
+                              ? 'Đang xử lý'
+                              : order.status === 'shipping'
+                              ? 'Đang giao hàng'
+                              : order.status === 'delivered'
+                              ? 'Đã giao'
+                              : order.status === 'cancelled'
+                              ? 'Đã hủy'
+                              : order.status === 'paid'
+                              ? 'Đã thanh toán'
+                              : order.status === 'failed'
+                              ? 'Thanh toán thất bại'
+                              : order.status === 'refunded'
+                              ? 'Đã hoàn tiền'
+                              : order.status}
                           </div>
                         </div>
                         <div className="flex justify-between items-center mt-2">
@@ -494,8 +534,24 @@ export default function ProfilePage() {
                         </div>
                          <div>
                            <p className="text-gray-500">Trạng thái:</p>
-                           <p className={`font-medium ${selectedOrder.status === 'delivered' ? 'text-green-600' : selectedOrder.status === 'cancelled' ? 'text-red-600' : selectedOrder.status === 'paid' ? 'text-blue-600' : selectedOrder.status === 'failed' ? 'text-orange-600' : 'text-yellow-600'}`}>
-                              {selectedOrder.status === 'pending' ? 'Đang xử lý' : selectedOrder.status === 'delivered' ? 'Đã giao' : selectedOrder.status === 'cancelled' ? 'Đã hủy' : selectedOrder.status === 'paid' ? 'Đã thanh toán' : 'Thanh toán thất bại'}
+                           <p className={`font-medium ${getStatusColor(selectedOrder.status)}`}>
+                              {selectedOrder.status === 'pending'
+                                ? 'Đang chờ xác nhận'
+                                : selectedOrder.status === 'processing'
+                                ? 'Đang xử lý'
+                                : selectedOrder.status === 'shipping'
+                                ? 'Đang giao hàng'
+                                : selectedOrder.status === 'delivered'
+                                ? 'Đã giao'
+                                : selectedOrder.status === 'cancelled'
+                                ? 'Đã hủy'
+                                : selectedOrder.status === 'paid'
+                                ? 'Đã thanh toán'
+                                : selectedOrder.status === 'failed'
+                                ? 'Thanh toán thất bại'
+                                : selectedOrder.status === 'refunded'
+                                ? 'Đã hoàn tiền'
+                                : selectedOrder.status}
                            </p>
                         </div>
                           {/* Add paymentId if available */}

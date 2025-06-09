@@ -79,17 +79,23 @@ const AdminOrdersPage = () => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending':
-        return 'text-yellow-600'; // Màu vàng
+        return 'text-yellow-600'; // Đang xử lý - vàng
+      case 'processing':
+        return 'text-purple-600'; // Đang xử lý chi tiết - tím
       case 'delivered':
-        return 'text-green-600'; // Màu xanh lá
+        return 'text-green-600'; // Đã giao - xanh lá
       case 'cancelled':
-        return 'text-red-600'; // Màu đỏ
-      case 'paid': // Thêm trạng thái đã thanh toán
-        return 'text-blue-600'; // Màu xanh dương
-      case 'failed': // Thêm trạng thái thanh toán thất bại
-        return 'text-orange-600'; // Màu cam
+        return 'text-red-600'; // Đã hủy - đỏ
+      case 'paid':
+        return 'text-blue-600'; // Đã thanh toán - xanh dương
+      case 'failed':
+        return 'text-orange-600'; // Thanh toán thất bại - cam
+      case 'refunded':
+        return 'text-pink-500'; // Đã hoàn tiền - hồng
+      case 'shipping':
+        return 'text-cyan-600'; // Đang giao hàng - xanh ngọc
       default:
-        return 'text-gray-800'; // Màu mặc định
+        return 'text-gray-800'; // Mặc định
     }
   };
 
@@ -193,11 +199,14 @@ const AdminOrdersPage = () => {
                     onChange={(e) => handleStatusChange(order._id, e.target.value)}
                     className={`border rounded p-1 ${getStatusColor(order.status)}`}
                   >
-                    <option value="pending">Đang xử lý</option>
+                    <option value="pending">Đang chờ xác nhận</option>
+                    <option value="processing">Đang xử lý</option>
+                    <option value="shipping">Đang giao hàng</option>
                     <option value="delivered">Đã giao</option>
                     <option value="cancelled">Đã hủy</option>
                     <option value="paid">Đã thanh toán</option>
                     <option value="failed">Thanh toán thất bại</option>
+                    <option value="refunded">Đã hoàn tiền</option>
                   </select>
                 </td>
                 <td className="py-2 px-4 border-b">{new Date(order.createdAt).toLocaleDateString()}</td>
@@ -234,17 +243,25 @@ const AdminOrdersPage = () => {
                 <div>
                   <p className="text-gray-500">Trạng thái:</p>
                   <p
-                    className={`font-medium ${
-                      getStatusColor(selectedOrder.status)
-                    }`}
+                    className={`font-medium ${getStatusColor(selectedOrder.status)}`}
                   >
                     {selectedOrder.status === "pending"
+                      ? "Đang chờ xác nhận"
+                      : selectedOrder.status === "processing"
                       ? "Đang xử lý"
+                      : selectedOrder.status === "shipping"
+                      ? "Đang giao hàng"
                       : selectedOrder.status === "delivered"
                       ? "Đã giao"
+                      : selectedOrder.status === "cancelled"
+                      ? "Đã hủy"
                       : selectedOrder.status === "paid"
                       ? "Đã thanh toán"
-                      : "Thanh toán thất bại"}
+                      : selectedOrder.status === "failed"
+                      ? "Thanh toán thất bại"
+                      : selectedOrder.status === "refunded"
+                      ? "Đã hoàn tiền"
+                      : selectedOrder.status}
                   </p>
                 </div>
               </div>
