@@ -84,15 +84,10 @@ export default function ProfilePage() {
       return;
     }
     try {
-      console.log("Fetching profile data for user ID:", user._id);
       const response = await fetch(`/api/admin/users/${user._id}`);
       if (!response.ok) throw new Error("Failed to fetch user profile");
       const data = await response.json();
-      console.log("Fetched user profile data:", data);
-      // Update user state in AuthContext with the latest data
       updateUser(data);
-       // Update profile form data with the latest data inside this function
-       // This happens only when fetchUserProfile is called
        setProfileFormData({
           fullName: data.fullName || "",
           email: data.email || "",
@@ -105,12 +100,8 @@ export default function ProfilePage() {
       console.error("Error fetching user profile:", error);
       toast.error("Không thể tải thông tin tài khoản");
     }
-  }, [user?._id, updateUser, setProfileFormData]); // Add dependencies for useCallback
-
-  // Ref to store the latest version of fetchUserProfile
+  }, [user?._id, updateUser, setProfileFormData]); 
   const fetchUserProfileRef = useRef(fetchUserProfile);
-
-  // Keep the ref updated whenever fetchUserProfile changes
   useEffect(() => {
     fetchUserProfileRef.current = fetchUserProfile;
   }, [fetchUserProfile]);
@@ -121,11 +112,9 @@ export default function ProfilePage() {
       return;
     }
     try {
-      console.log("Fetching orders for user ID:", user._id);
       const response = await fetch(`/api/orders?userId=${user._id}`);
       if (!response.ok) throw new Error("Failed to fetch orders");
       const data = await response.json();
-      console.log("Fetched orders data for profile:", data);
       setOrders(data);
     } catch (error: unknown) {
       console.error("Error fetching orders:", error);
