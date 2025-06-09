@@ -1,35 +1,28 @@
+// đúng kiểu RouteContext của Next.js
 import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import Order from "@/models/Order";
 
-export async function GET({
-  params,
-}: {
-  params: Promise<{ orderId: string }>
-}) {
-  const { orderId } = await params;
-
+// ✅ GET ORDER
+export async function GET(
+  _request: NextRequest,
+  { params }: { params: { orderId: string } }
+) {
+  const { orderId } = params;
   await connectDB();
-
   const order = await Order.findById(orderId);
-
   if (!order) {
     return NextResponse.json({ error: "Order not found" }, { status: 404 });
   }
-
   return NextResponse.json(order);
 }
 
+// ✅ UPDATE ORDER
 export async function PUT(
   request: NextRequest,
-  {
-    params,
-  }: {
-    params: Promise<{ orderId: string }>;
-  }
+  { params }: { params: { orderId: string } }
 ) {
-  const { orderId } = await params;
-
+  const { orderId } = params;
   await connectDB();
 
   try {
@@ -37,10 +30,7 @@ export async function PUT(
     const { paymentId } = body;
 
     if (!paymentId) {
-      return NextResponse.json(
-        { error: "Payment ID is required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Payment ID is required" }, { status: 400 });
     }
 
     const updatedOrder = await Order.findByIdAndUpdate(
@@ -60,9 +50,6 @@ export async function PUT(
     return NextResponse.json(updatedOrder);
   } catch (error) {
     console.error("Error updating order:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
