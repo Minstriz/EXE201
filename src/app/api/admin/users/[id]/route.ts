@@ -1,23 +1,17 @@
-import { NextResponse } from 'next/server';
-// Removed fs and path imports
-// import fs from 'fs';
-// import path from 'path';
-
+import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import User from '@/models/User';
 import mongoose from 'mongoose';
 
-// Removed usersFilePath constant
-// const usersFilePath = path.join(process.cwd(), 'data', 'users.json');
+// Định nghĩa kiểu RouteContext với params là Promise
+type RouteContext = {
+  params: Promise<{ id: string }>;
+};
 
-// Connect to database
-connectDB();
-
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, context: RouteContext) {
   await connectDB();
-  const { id } = await params;
+  const { id } = await context.params; // Sử dụng await để giải nén id
 
-  // Check if the ID is a valid MongoDB ObjectId
   if (!mongoose.Types.ObjectId.isValid(id)) {
     return NextResponse.json({ message: 'Invalid User ID' }, { status: 400 });
   }
@@ -33,11 +27,10 @@ export async function GET(request: Request, { params }: { params: { id: string }
   }
 }
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, context: RouteContext) {
   await connectDB();
-  const { id } = await params;
+  const { id } = await context.params; // Sử dụng await để giải nén id
 
-  // Check if the ID is a valid MongoDB ObjectId
   if (!mongoose.Types.ObjectId.isValid(id)) {
     return NextResponse.json({ message: 'Invalid User ID' }, { status: 400 });
   }
@@ -54,11 +47,10 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, context: RouteContext) {
   await connectDB();
-  const { id } = await params;
+  const { id } = await context.params; // Sử dụng await để giải nén id
 
-  // Check if the ID is a valid MongoDB ObjectId
   if (!mongoose.Types.ObjectId.isValid(id)) {
     return NextResponse.json({ message: 'Invalid User ID' }, { status: 400 });
   }
@@ -72,4 +64,4 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
   } catch (error) {
     return NextResponse.json({ message: (error as Error).message }, { status: 500 });
   }
-} 
+}

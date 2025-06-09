@@ -18,7 +18,7 @@ function NavBar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
-  // eslint-disable-next-line
+
   const { user, isAuthenticated, logout, isLoading } = useAuth();
 
   useEffect(() => {

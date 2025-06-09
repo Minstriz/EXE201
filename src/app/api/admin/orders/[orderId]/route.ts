@@ -3,15 +3,14 @@ import connectDB from '@/lib/mongodb';
 import Order from '@/models/Order';
 import mongoose from 'mongoose';
 
+// Định nghĩa kiểu RouteContext
 type RouteContext = {
-  params: {
-    orderId: string;
-  };
+  params: Promise<{ orderId: string }>;
 };
 
 export async function GET(request: NextRequest, context: RouteContext) {
   await connectDB();
-  const { orderId } = context.params;
+  const { orderId } = await context.params;
 
   if (!mongoose.Types.ObjectId.isValid(orderId)) {
     return NextResponse.json({ message: 'Invalid Order ID' }, { status: 400 });
@@ -28,10 +27,9 @@ export async function GET(request: NextRequest, context: RouteContext) {
   }
 }
 
-// Các hàm PUT, DELETE cũng tương tự:
 export async function PUT(request: NextRequest, context: RouteContext) {
   await connectDB();
-  const { orderId } = context.params;
+  const { orderId } = await context.params;
 
   if (!mongoose.Types.ObjectId.isValid(orderId)) {
     return NextResponse.json({ message: 'Invalid Order ID' }, { status: 400 });
@@ -51,7 +49,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
 
 export async function DELETE(request: NextRequest, context: RouteContext) {
   await connectDB();
-  const { orderId } = context.params;
+  const { orderId } = await context.params;
 
   if (!mongoose.Types.ObjectId.isValid(orderId)) {
     return NextResponse.json({ message: 'Invalid Order ID' }, { status: 400 });
