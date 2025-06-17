@@ -12,6 +12,7 @@ export interface IUser extends Document {
   city?: string;
   province?: string;
   createdAt: Date;
+  role: 'customer' | 'admin';
 }
 
 // Define the user schema
@@ -25,6 +26,7 @@ const UserSchema = new Schema({
   city: { type: String },
   province: { type: String },
   createdAt: { type: Date, default: Date.now },
+  role: { type: String, enum: ['customer', 'admin'], default: 'customer' },
 });
 
 // Kiểm tra nếu model đã tồn tại trước khi định nghĩa

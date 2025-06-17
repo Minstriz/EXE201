@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import Slider from "react-slick";
 import { Button } from "@/components/ui/button";
 import { useCategories } from "@/app/hooks/useCategories";
@@ -7,32 +7,36 @@ import { useProducts } from "@/app/hooks/useProducts";
 import { useCart } from "@/app/context/CartContext";
 import Image from "next/image";
 import { toast } from "sonner";
-
-interface Product {
-  id: number; // Assuming id is number for now based on previous JSON data
-  name: string;
-  price: number;
-  image: string;
-  category: string;
-  // Add other fields as needed
-}
+import Link from "next/link";
+import { Product } from "@/types/product"; // Import Product interface from types
 
 function ProductPage() {
   const { categories } = useCategories();
   const { products, loading: loadingProducts } = useProducts();
   const { addToCart } = useCart();
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-  const groupedProducts = categories.reduce((acc: { [key: string]: Product[] }, category: string) => {
-    acc[category] = products.filter((p: Product) => p.category === category);
+  // Group products by category
+  const groupedProducts = products.reduce((acc: { [key: string]: Product[] }, product: Product) => {
+    const category = product.category;
+    if (!acc[category]) {
+      acc[category] = [];
+    }
+    acc[category].push(product);
     return acc;
   }, {});
+
+  // Filter products based on selected category
+  const filteredProducts = selectedCategory
+    ? { [selectedCategory]: groupedProducts[selectedCategory] }
+    : groupedProducts;
 
   const handleAddToCart = (product: Product) => {
     addToCart({
       id: product.id.toString(),
       name: product.name,
       price: product.price,
-      image: product.image,
+      image: product.mainImage, // Use mainImage for cart item
       category: product.category,
       quantity: 1,
     });
@@ -87,7 +91,12 @@ function ProductPage() {
 
         <Button
           variant="outline"
-          className="border-[#219EBC] text-[#219EBC] hover:bg-[#219EBC] hover:text-white"
+          className={`border-[#219EBC] ${
+            selectedCategory === null
+              ? "bg-[#219EBC] text-white"
+              : "text-[#219EBC] hover:bg-[#219EBC] hover:text-white"
+          }`}
+          onClick={() => setSelectedCategory(null)}
         >
           Tất cả
         </Button>
@@ -96,24 +105,22 @@ function ProductPage() {
           <Button
             key={category}
             variant="outline"
-            className="border-[#219EBC] text-[#219EBC] hover:bg-[#219EBC] hover:text-white"
+            className={`border-[#219EBC] ${
+              selectedCategory === category
+                ? "bg-[#219EBC] text-white"
+                : "text-[#219EBC] hover:bg-[#219EBC] hover:text-white"
+            }`}
+            onClick={() => setSelectedCategory(category)}
           >
             {category}
           </Button>
         ))}
-
-        <Button
-          variant="outline"
-          className="border-[#219EBC] text-[#219EBC] hover:bg-[#219EBC] hover:text-white"
-        >
-          Tự thiết kế
-        </Button>
       </div>
 
       {loadingProducts ? (
         <p className="text-center">Đang tải sản phẩm...</p>
       ) : (
-        Object.keys(groupedProducts).map((category) => (
+        Object.keys(filteredProducts).map((category) => (
           <div key={category} className="mb-12">
             <h2 className="text-xl font-bold text-[#219EBC] uppercase mb-6">
               {category}
@@ -122,16 +129,18 @@ function ProductPage() {
             <div className="w-full flex justify-center">
               <div className="max-w-[1200px] w-full">
                 <Slider {...sliderSettings}>
-                  {groupedProducts[category].map((product: Product) => (
+                  {filteredProducts[category].map((product: Product) => (
                     <div key={product.id} className="px-2">
                       <div className="relative bg-white rounded-md transition transform hover:-translate-y-1">
-                        <Image
-                          src={product.image}
-                          alt={product.name}
-                          width={348}
-                          height={381}
-                          className="rounded-md object-contain w-[348px] h-[381px]"
-                        />
+                        <Link href={`/products/${product.slug}`}>
+                          <Image
+                            src={product.mainImage}
+                            alt={product.name}
+                            width={348}
+                            height={381}
+                            className="rounded-md object-contain w-[348px] h-[381px]"
+                          />
+                        </Link>
 
                         {/* Icon túi sách góc dưới bên phải */}
                         <div
