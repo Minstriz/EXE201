@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 interface User {
   _id: string;
@@ -16,6 +17,7 @@ interface User {
   city?: string;
   province?: string;
   createdAt?: string;
+  role?: 'customer' | 'admin';
 }
 
 const AdminUsersPage = () => {
@@ -135,6 +137,7 @@ const AdminUsersPage = () => {
               <th className="py-2 px-4 border-b">Email</th>
               <th className="py-2 px-4 border-b">Full Name</th>
               <th className="py-2 px-4 border-b">Phone</th>
+              <th className="py-2 px-4 border-b">Role</th>
               <th className="py-2 px-4 border-b">Actions</th>
             </tr>
           </thead>
@@ -146,6 +149,38 @@ const AdminUsersPage = () => {
                 <td className="py-2 px-4 border-b">{user.email}</td>
                 <td className="py-2 px-4 border-b">{user.fullName}</td>
                 <td className="py-2 px-4 border-b">{user.phone}</td>
+                <td className="py-2 px-4 border-b">
+                  <select
+                    value={user.role || 'customer'}
+                    onChange={async (e) => {
+                      const newRole = e.target.value as "customer" | "admin";
+                      console.log('Frontend: Attempting to update role', { userId: user._id, newRole });
+                      try {
+                        const res = await fetch(`/api/admin/users/${user._id}`, {
+                          method: 'PUT',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ role: newRole }),
+                        });
+                        if (!res.ok) {
+                          const errorData = await res.json();
+                          console.error('Frontend: API update failed', res.status, errorData);
+                          toast.error(`Cập nhật role thất bại: ${errorData.message || res.statusText}`);
+                          throw new Error('Cập nhật role thất bại');
+                        }
+                        setUsers(users.map(u => u._id === user._id ? { ...u, role: newRole } : u));
+                        console.log('Frontend: Role updated successfully', { userId: user._id, newRole });
+                        toast.success('Cập nhật role thành công!');
+                      } catch (err) {
+                        console.error('Frontend: Error during fetch or state update', err);
+                        toast.error(`Lỗi: ${(err as Error).message}`);
+                      }
+                    }}
+                    className="border rounded px-2 py-1"
+                  >
+                    <option value="customer">customer</option>
+                    <option value="admin">admin</option>
+                  </select>
+                </td>
                 <td className="py-2 px-4 border-b">
                   {/* Action buttons */}
                   <div className="flex flex-col space-y-2">

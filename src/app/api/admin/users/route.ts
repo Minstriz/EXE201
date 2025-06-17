@@ -33,7 +33,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('Error adding user:', error);
     // Handle duplicate key error (e.g., duplicate username or email)
-    if (error.code === 11000) {
+    if ((error as any).code === 11000) {
        return NextResponse.json({ message: 'Username or Email already exists' }, { status: 400 });
     }
     return NextResponse.json({ message: (error as Error).message }, { status: 500 });

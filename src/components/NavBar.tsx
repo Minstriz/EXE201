@@ -188,6 +188,51 @@ function NavBar() {
             </div>
           </div>
         </div>
+
+        {/* Mobile menu */}
+        <div
+          className={`md:hidden fixed inset-0 bg-white z-50 transform transition-transform duration-300 ease-in-out ${
+            isOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
+        >
+          <div className="flex flex-col h-full">
+            <div className="flex justify-between items-center p-4 border-b">
+              <Link href="/" className="flex-shrink-0">
+                <Image
+                  src="/images/logo.png"
+                  alt="Logo"
+                  width={40}
+                  height={40}
+                  className="h-8 w-auto"
+                />
+              </Link>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="p-2 hover:bg-gray-100 rounded-full"
+              >
+                <XMarkIcon className="h-6 w-6 text-gray-500" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              <div className="px-4 py-2 space-y-1">
+                {navBarData.map((item) => (
+                  <Link
+                    key={item.title}
+                    href={item.link}
+                    className={`block px-4 py-2 text-base font-medium rounded-md ${
+                      pathname === item.link
+                        ? "text-[#219EBC] bg-gray-50"
+                        : "text-gray-500 hover:text-gray-900 hover:bg-gray-50"
+                    }`}
+                    onClick={() => setIsOpen(false)}
+                  >
+                    {item.title}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
       </nav>
       <CartSidebar isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
     </>
