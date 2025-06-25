@@ -29,6 +29,8 @@ const AdminUsersPage = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null); // State to hold user data for editing
   const [editFormData, setEditFormData] = useState<Partial<User>>({}); // State for form inputs
 
+  const [search, setSearch] = useState("");
+
   const fetchUsers = async () => {
     try {
       const res = await fetch('/api/admin/users');
@@ -117,6 +119,8 @@ const AdminUsersPage = () => {
     }
   };
 
+  const filteredUsers = users.filter(user => user.username.toLowerCase().includes(search.toLowerCase()));
+
   if (loading) {
     return <div>Loading users...</div>;
   }
@@ -128,6 +132,14 @@ const AdminUsersPage = () => {
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-2xl font-bold mb-4">Quản lý tài khoản</h1>
+      <div className="mb-4 flex items-center gap-2">
+        <Input
+          placeholder="Tìm kiếm theo tên người dùng..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          className="w-64"
+        />
+      </div>
       <div className="overflow-x-auto">
         <table className="min-w-full bg-white border border-gray-300">
           <thead>
@@ -142,7 +154,7 @@ const AdminUsersPage = () => {
             </tr>
           </thead>
           <tbody>
-            {users.map((user) => (
+            {filteredUsers.map((user) => (
               <tr key={user._id}>
                 <td className="py-2 px-4 border-b">{user._id}</td>
                 <td className="py-2 px-4 border-b">{user.username}</td>

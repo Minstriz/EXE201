@@ -26,12 +26,6 @@ export const SIDEBAR_DATA = [
     icon: <Users />,
   },
   {
-    key: "Category",
-    label: "Category",
-    path: "/admin/category",
-    icon: <Package />,
-  },
-  {
     key: "Products",
     label: "Products",
     path: "/admin/products",
@@ -42,12 +36,6 @@ export const SIDEBAR_DATA = [
     label: "Orders",
     path: "/admin/order",
     icon: <ShoppingCart />,
-  },
-  {
-    key: "Coupon",
-    label: "Coupon",
-    path: "/admin/coupon",
-    icon: <Ticket />,
   },
 ];
 

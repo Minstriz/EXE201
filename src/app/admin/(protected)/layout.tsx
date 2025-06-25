@@ -1,19 +1,20 @@
-import type { Metadata } from "next";
-import "../globals.css";
+"use client";
 import AppHeader from "@/components/admin/AppHeader";
 import AppSidebar from "@/components/admin/AppSidebar";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
-export const metadata: Metadata = {
-  title: "À Sài Gòn",
-  description:
-    "À Sài Gòn - Chuyên cung cấp các sản phẩm thủ công, handmade, thiết kế riêng tại Sài Gòn",
-};
+export default function AdminProtectedLayout({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const isAdmin = localStorage.getItem("isAdmin");
+      if (isAdmin !== "true") {
+        router.replace("/admin/login");
+      }
+    }
+  }, []);
 
-export default function AdminLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
       <div className="hidden border-r bg-muted/40 md:block">
@@ -27,4 +28,4 @@ export default function AdminLayout({
       </div>
     </div>
   );
-}
+} 
