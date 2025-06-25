@@ -163,8 +163,28 @@ export default function CartPage() {
 
   return (
     <div className="pt-20 max-w-7xl mx-auto px-4">
-      <h1 className="text-4xl font-extrabold text-center text-orange-400 mb-8 mt-10">
-        Giỏ hàng của bạn
+      {/* Progress Header */}
+      <div className="flex justify-center mb-8">
+        <div className="flex items-center bg-[#e0f4ff] rounded-lg px-8 py-4 gap-8">
+          <div className="flex flex-col items-center">
+            <div className="w-8 h-8 rounded-full bg-[#FB8501] text-white flex items-center justify-center font-bold">1</div>
+            <span className="mt-2 text-sm font-semibold text-[#219EBC]">Giỏ hàng</span>
+          </div>
+          <div className="w-12 h-1 bg-[#219EBC] rounded"></div>
+          <div className="flex flex-col items-center">
+            <div className="w-8 h-8 rounded-full bg-white border-2 border-[#219EBC] text-[#219EBC] flex items-center justify-center font-bold">2</div>
+            <span className="mt-2 text-sm font-semibold text-[#219EBC]">Chi tiết thanh toán</span>
+          </div>
+          <div className="w-12 h-1 bg-[#219EBC] rounded"></div>
+          <div className="flex flex-col items-center">
+            <div className="w-8 h-8 rounded-full bg-white border-2 border-[#219EBC] text-[#219EBC] flex items-center justify-center font-bold">3</div>
+            <span className="mt-2 text-sm font-semibold text-[#219EBC]">Hoàn tất đơn hàng</span>
+          </div>
+        </div>
+      </div>
+
+      <h1 className="text-4xl font-extrabold text-center text-[#FB8501] mb-8 mt-10">
+        CHỐT ĐƠN!
       </h1>
 
       {items.length === 0 ? (
@@ -179,142 +199,125 @@ export default function CartPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left: Cart Items */}
           <div className="lg:col-span-2">
-            {items.map((item) => (
-              <div
-                key={item.id}
-                className="flex gap-4 mb-6 p-4 bg-white rounded-lg shadow"
-              >
-                <div className="relative w-32 h-32">
-                  <Image
-                    src={item.image}
-                    alt={item.name}
-                    fill
-                    className="object-cover rounded"
-                  />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-medium text-lg">{item.name}</h3>
-                  <p className="text-sm text-gray-500">{item.category}</p>
-                  <p className="font-bold mt-2">
-                    {item.price.toLocaleString()} VNĐ
-                  </p>
-                  <div className="flex items-center gap-4 mt-4">
-                    <div className="flex items-center gap-2">
+            {/* Coupon input */}
+            <div className="flex items-center mb-4">
+              <span className="font-bold text-lg mr-4">Giỏ hàng</span>
+              <input
+                type="text"
+                placeholder="Mã giảm giá"
+                className="border rounded px-3 py-2 text-sm w-40"
+              />
+              <Button className="ml-2 bg-[#219EBC] text-white">Áp dụng</Button>
+            </div>
+            {/* Cart Table */}
+            <div className="flex flex-col gap-4">
+              {items.map((item) => (
+                <div
+                  key={item.id}
+                  className="flex gap-4 p-4 bg-white rounded-lg shadow items-center"
+                >
+                  <div className="relative w-24 h-24 flex-shrink-0">
+                    <Image
+                      src={item.image}
+                      alt={item.name}
+                      fill
+                      className="object-contain rounded"
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="font-bold text-base text-[#023048] truncate">{item.name}</h3>
+                        <p className="text-xs text-gray-500 mt-1">{item.category} {item.size && <>| size {item.size}</>}</p>
+                      </div>
                       <button
-                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                        className="w-8 h-8 flex items-center justify-center border rounded hover:bg-gray-100"
+                        onClick={() => removeFromCart(item.id)}
+                        className="text-red-500 hover:text-red-700 ml-2"
+                        title="Xóa sản phẩm"
                       >
-                        -
-                      </button>
-                      <span className="w-8 text-center">{item.quantity}</span>
-                      <button
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        className="w-8 h-8 flex items-center justify-center border rounded hover:bg-gray-100"
-                      >
-                        +
+                        <X className="w-5 h-5" />
                       </button>
                     </div>
-                    <button
-                      onClick={() => removeFromCart(item.id)}
-                      className="text-red-500 hover:text-red-700"
-                    >
-                      <X className="w-5 h-5" />
-                    </button>
+                    <div className="flex items-center gap-2 mt-2">
+                      <span className="font-bold">{item.price.toLocaleString()} VND</span>
+                      <span className="mx-2">x</span>
+                      <div className="flex items-center border rounded">
+                        <button
+                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                          className="w-7 h-7 flex items-center justify-center text-lg font-bold text-[#219EBC]"
+                        >
+                          -
+                        </button>
+                        <span className="w-8 text-center">{item.quantity}</span>
+                        <button
+                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                          className="w-7 h-7 flex items-center justify-center text-lg font-bold text-[#219EBC]"
+                        >
+                          +
+                        </button>
+                      </div>
+                      <span className="mx-2">=</span>
+                      <span className="font-bold text-[#FB8501]">{(item.price * item.quantity).toLocaleString()} VND</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="lg:col-span-1">
-            <div className="bg-white p-6 rounded-lg shadow sticky top-24">
-              <h2 className="text-xl font-bold mb-4">Tổng đơn hàng</h2>
-              <div className="space-y-2 mb-4">
-                <div className="flex justify-between">
-                  <span>Tạm tính:</span>
-                  <span>{totalAmount.toLocaleString()} VNĐ</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Phí vận chuyển:</span>
-                  <span>Miễn phí</span>
-                </div>
-                <div className="border-t pt-2 mt-2">
-                  <div className="flex justify-between font-bold">
-                    <span>Tổng cộng:</span>
-                    <span> {totalAmount.toLocaleString()} VNĐ</span>
-                  </div>
-                </div>
-              </div>
-              
-              {showAddressForm ? (
-                <form onSubmit={handleUpdateAddress} className="space-y-4">
-                   <p className="text-red-500 text-sm mb-4">Vui lòng cập nhật địa chỉ để tiếp tục thanh toán.</p>
-                  <div>
-                    <label htmlFor="address" className="block text-sm font-medium text-gray-700">
-                      Địa chỉ
-                    </label>
-                    <input
-                      type="text"
-                      id="address"
-                      required
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-base md:text-lg"
-                      value={addressForm.address}
-                      onChange={(e) =>
-                        setAddressForm({ ...addressForm, address: e.target.value })
-                      }
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="city" className="block text-sm font-medium text-gray-700">
-                      Thành phố
-                    </label>
-                    <input
-                      type="text"
-                      id="city"
-                      required
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-base md:text-lg"
-                      value={addressForm.city}
-                      onChange={(e) =>
-                        setAddressForm({ ...addressForm, city: e.target.value })
-                      }
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="province" className="block text-sm font-medium text-gray-700">
-                      Tỉnh/Thành phố
-                    </label>
-                    <input
-                      type="text"
-                      id="province"
-                      required
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-base md:text-lg"
-                      value={addressForm.province}
-                      onChange={(e) =>
-                        setAddressForm({ ...addressForm, province: e.target.value })
-                      }
-                    />
-                  </div>
-                  <Button
-                     type="submit"
-                     className="w-full bg-[#219EBC] hover:bg-[#197ba3] text-white font-bold py-2 px-4 rounded"
-                   >
-                     Cập nhật địa chỉ
-                   </Button>
-                </form>
-              ) : (
-                 <Button
-                   onClick={handlePayment}
-                   className="w-full bg-[#219EBC] hover:bg-[#197ba3] text-white font-bold py-2 px-4 rounded"
-                 >
-                   Thanh toán qua VNPay
-                 </Button>
-              )}
-
+              ))}
+            </div>
+            <div className="flex items-center gap-2 mt-4 text-[#FB8501] font-medium">
+              <span>•</span> Giỏ hàng đã được cập nhật
             </div>
           </div>
-      </div>
+
+          {/* Right: Order Summary */}
+          <div className="lg:col-span-1">
+            <CartSummary totalAmount={totalAmount} onCheckout={handlePayment} />
+          </div>
+        </div>
       )}
+    </div>
+  );
+}
+
+// CartSummary component for right column
+function CartSummary({ totalAmount, onCheckout }: { totalAmount: number; onCheckout: () => void }) {
+  const [shipping, setShipping] = React.useState<number>(0);
+  return (
+    <div className="bg-[#e0f4ff] p-6 rounded-lg shadow sticky top-24">
+      <h2 className="text-xl font-bold mb-4">Tổng tiền giỏ hàng</h2>
+      <div className="space-y-2 mb-4">
+        <div className="flex justify-between">
+          <span>Tạm tính:</span>
+          <span>{totalAmount.toLocaleString()} VND</span>
+        </div>
+        <div className="flex flex-col gap-2 mt-2">
+          <span className="font-semibold">Tính phí vận chuyển</span>
+          <div className="flex flex-col gap-1">
+            <label className="flex items-center">
+              <input type="radio" name="shipping" value={0} checked={shipping === 0} onChange={() => setShipping(0)} className="mr-2" />
+              Vận chuyển tiết kiệm
+            </label>
+            <label className="flex items-center">
+              <input type="radio" name="shipping" value={20000} checked={shipping === 20000} onChange={() => setShipping(20000)} className="mr-2" />
+              Vận chuyển nhanh nội thành TPHCM
+            </label>
+            <label className="flex items-center">
+              <input type="radio" name="shipping" value={30000} checked={shipping === 30000} onChange={() => setShipping(30000)} className="mr-2" />
+              Phí cố định: 30.000 VND
+            </label>
+          </div>
+        </div>
+        <div className="border-t pt-2 mt-2">
+          <div className="flex justify-between font-bold">
+            <span>Tổng cộng:</span>
+            <span>{(totalAmount + shipping).toLocaleString()} VND</span>
+          </div>
+        </div>
+      </div>
+      <Button className="w-full bg-[#FB8501] hover:bg-[#ffb703] text-white font-bold text-lg py-3 mt-4" onClick={onCheckout}>
+        TIẾN HÀNH THANH TOÁN
+      </Button>
     </div>
   );
 }

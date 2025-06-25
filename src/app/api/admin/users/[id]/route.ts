@@ -31,7 +31,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
 
 export async function PUT(request: NextRequest, context: RouteContext) {
   await connectDB();
-  const { id } = await context.params; // Sửa lại: Thêm await
+  const { id } = await context.params;
 
   console.log('API PUT User: Received ID', id);
 
@@ -43,24 +43,19 @@ export async function PUT(request: NextRequest, context: RouteContext) {
     const body = await request.json();
     console.log('API PUT User: Received Body', body);
 
-    const userToUpdate = await User.findById(id);
+    // Sử dụng findByIdAndUpdate để cập nhật trực tiếp
+    const updatedUser = await User.findByIdAndUpdate(
+      id,
+      { $set: { role: body.role } },
+      { new: true, runValidators: true }
+    );
 
-    if (!userToUpdate) {
+    if (!updatedUser) {
       console.log('API PUT User: User not found', id);
       return NextResponse.json({ message: 'User not found' }, { status: 404 });
     }
 
-    // Cập nhật trường role và lưu
-    console.log('API PUT User: User before update', userToUpdate.toObject());
-    userToUpdate.role = body.role;
-    const updatedUser = await userToUpdate.save();
-
     console.log('API PUT User: Successfully updated - Mongoose object', updatedUser.toObject());
-
-    // Thêm bước kiểm tra: Fetch lại user ngay sau khi update
-    const reFetchedUser = await User.findById(id);
-    console.log('API PUT User: Re-fetched user from DB', reFetchedUser ? reFetchedUser.toObject() : null);
-
     return NextResponse.json(updatedUser.toObject(), { status: 200 });
   } catch (error) {
     console.error('API PUT User: Error updating user', error);

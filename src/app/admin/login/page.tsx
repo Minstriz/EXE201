@@ -4,9 +4,28 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { FaGoogle, FaFacebookF, FaGithub, FaLinkedinIn } from "react-icons/fa";
+import { useRouter } from "next/navigation";
+
+const ADMIN_EMAIL = "asaigonadministrator@gmail.com";
+const ADMIN_PASSWORD = "asaigontuyetvoi12345!";
 
 const AuthForm = () => {
   const [isActive, setIsActive] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const router = useRouter();
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+      localStorage.setItem("isAdmin", "true");
+      setError("");
+      router.push("/admin");
+    } else {
+      setError("Sai tài khoản hoặc mật khẩu admin!");
+    }
+  };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-gray-200 to-blue-200">
@@ -15,56 +34,6 @@ const AuthForm = () => {
           isActive ? "active" : ""
         }`}
       >
-        {/* Đăng ký */}
-        <div
-          className={`absolute top-0 left-0 w-1/2 h-full transition-all duration-500 ${
-            isActive ? "translate-x-full opacity-100 " : "opacity-0 z-0"
-          }`}
-        >
-          <form className="flex flex-col items-center justify-center h-full p-12">
-            <h1 className="text-2xl font-bold">Tạo tài khoản</h1>
-            <div className="flex space-x-3 my-5">
-              <FaGoogle className="p-3 border rounded-full w-12 h-12" />
-              <FaFacebookF className="p-3 border rounded-full w-12 h-12" />
-              <FaGithub className="p-3 border rounded-full w-12 h-12" />
-              <FaLinkedinIn className="p-3 border rounded-full w-12 h-12" />
-            </div>
-            <div className="grid gap-4 w-4/5">
-              <div className="grid gap-2">
-                <Label htmlFor="name">Họ và Tên</Label>
-                <Input
-                  id="name"
-                  type="text"
-                  placeholder="Nguyễn Văn A"
-                  required
-                  className="h-12"
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="m@example.com"
-                  required
-                  className="h-12"
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="password">Mật khẩu</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  required
-                  className="h-12"
-                />
-              </div>
-              <Button type="submit" className="w-full h-12">
-                Đăng ký
-              </Button>
-            </div>
-          </form>
-        </div>
 
         {/* Đăng nhập */}
         <div
@@ -72,14 +41,8 @@ const AuthForm = () => {
             isActive ? "-translate-x-full opacity-0 z-0" : "opacity-100 z-10"
           }`}
         >
-          <form className="flex flex-col items-center justify-center h-full p-12">
+          <form className="flex flex-col items-center justify-center h-full p-12" onSubmit={handleLogin}>
             <h1 className="text-2xl font-bold">Đăng nhập</h1>
-            <div className="flex space-x-3 my-5">
-              <FaGoogle className="p-3 border rounded-full w-12 h-12" />
-              <FaFacebookF className="p-3 border rounded-full w-12 h-12" />
-              <FaGithub className="p-3 border rounded-full w-12 h-12" />
-              <FaLinkedinIn className="p-3 border rounded-full w-12 h-12" />
-            </div>
             <div className="grid gap-4 w-4/5">
               <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
@@ -89,6 +52,8 @@ const AuthForm = () => {
                   placeholder="m@example.com"
                   required
                   className="h-12"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
                 />
               </div>
               <div className="grid gap-2">
@@ -98,6 +63,8 @@ const AuthForm = () => {
                   type="password"
                   required
                   className="h-12"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
                 />
                 <a
                   href="#"
@@ -106,6 +73,7 @@ const AuthForm = () => {
                   Quên mật khẩu?
                 </a>
               </div>
+              {error && <div className="text-red-500 text-sm">{error}</div>}
               <Button type="submit" className="w-full h-12">
                 Đăng nhập
               </Button>
@@ -131,11 +99,8 @@ const AuthForm = () => {
             </div>
           ) : (
             <div className="text-center">
-              <h1 className="text-2xl font-bold">Xin chào!</h1>
-              <p className="my-4">Đăng ký để trải nghiệm ngay</p>
-              <Button onClick={() => setIsActive(true)} className="h-12">
-                Đăng ký
-              </Button>
+              <h1 className="text-2xl font-bold">À SÀI GÒN MANAGEMENT</h1>
+              <p className="my-4">Đăng nhập để tiếp tục</p>
             </div>
           )}
         </div>
