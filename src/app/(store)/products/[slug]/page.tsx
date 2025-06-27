@@ -14,7 +14,6 @@ import {
   ShoppingBagIcon,
   ShoppingCartIcon,
 } from "@heroicons/react/24/outline";
-import { useCartStore } from "@/store/useCartStore";
 import toast from "react-hot-toast";
 import { useWishlistStore } from "@/store/useWhistlist";
 import Image from "next/image";
@@ -22,13 +21,16 @@ import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { Product } from "@/types/product";
+import { useRouter } from "next/navigation";
+import { useCart } from "@/app/context/CartContext";
 
 function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
   const { products } = useProducts();
-  const { addItem } = useCartStore();
+  const { addToCart } = useCart();
   const { toggleFavorite, items: favorites } = useWishlistStore();
   const { slug } = use(params);
   const product = products.find((p) => p.slug === slug);
+  const router = useRouter();
 
   // Di chuyển các useState và logic tính toán lên đầu
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
@@ -66,8 +68,33 @@ function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
       return;
     }
 
-    addItem(product, selectedSize, selectedColor);
+    addToCart({
+      id: String(product.id),
+      name: product.name,
+      price: product.price,
+      image: product.mainImage,
+      quantity: 1,
+      category: product.category,
+      size: selectedSize,
+    });
     toast.success("Thêm sản phẩm vào giỏ hàng!");
+  };
+
+  const handleBuyNow = () => {
+    if (!selectedSize || !selectedColor) {
+      toast.error("Vui lòng chọn kích thước và màu sắc!");
+      return;
+    }
+    addToCart({
+      id: String(product.id),
+      name: product.name,
+      price: product.price,
+      image: product.mainImage,
+      quantity: 1,
+      category: product.category,
+      size: selectedSize,
+    });
+    router.push("/cart");
   };
 
   const handleToggleFavorite = () => {
@@ -179,7 +206,7 @@ function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
                 <ShoppingCartIcon className="w-6 h-6" />
                 <span>Thêm vào giỏ hàng</span>
               </Button>
-              <Button className="cursor-pointer">
+              <Button className="cursor-pointer" onClick={handleBuyNow}>
                 <ShoppingBagIcon className="w-6 h-6" />
                 <span>Mua ngay</span>
               </Button>

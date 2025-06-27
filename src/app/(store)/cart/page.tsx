@@ -27,6 +27,9 @@ export default function CartPage() {
     city: "",
     province: "",
   });
+  const [paymentMethod, setPaymentMethod] = useState<'vnpay' | 'qr'>('vnpay');
+  const [showQROverlay, setShowQROverlay] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     // Lấy thông tin người dùng từ localStorage
@@ -46,11 +49,18 @@ export default function CartPage() {
       toast.error("Vui lòng đăng nhập để thanh toán");
       return;
     }
-
+    if (paymentMethod === 'qr') {
+      setShowQROverlay(true);
+      return;
+    }
+    // VNPAY logic as before
     try {
-      // Bước 1: Lưu đơn hàng vào data/orders.json thông qua API backend
+      setIsProcessing(true);
       const orderData = {
-        userId: user._id,
+        userId: {
+          _id: user._id,
+          fullName: user.fullName,
+        },
         items: items.map(item => ({
           id: item.id,
           name: item.name,
@@ -62,20 +72,15 @@ export default function CartPage() {
         totalAmount: totalAmount,
         status: "pending", // Trạng thái ban đầu là pending
       };
-
       const saveOrderResponse = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(orderData)
       });
-
       if (!saveOrderResponse.ok) {
         throw new Error("Lỗi khi lưu đơn hàng");
       }
-
       const savedOrder = await saveOrderResponse.json();
-      console.log("Đơn hàng đã được lưu thành công với ID:", savedOrder._id);
-
       // Bước 2: Tạo thanh toán với VNPay sử dụng ID đơn hàng từ backend
       const paymentResponse = await fetch("/api/create-payment", {
         method: "POST",
@@ -87,22 +92,11 @@ export default function CartPage() {
           orderId: savedOrder._id,
         }),
       });
-
       if (!paymentResponse.ok) {
-         // Nếu tạo thanh toán VNPay lỗi, cập nhật trạng thái đơn hàng sang payment_failed (tùy chọn)
-         // await fetch(`/api/orders/${savedOrder.id}`, {
-         //   method: "PUT",
-         //   headers: { "Content-Type": "application/json" },
-         //   body: JSON.stringify({ status: "payment_failed" })
-         // });
         throw new Error("Lỗi khi tạo thanh toán VNPay");
       }
-
       const { paymentUrl } = await paymentResponse.json();
-
-      // Bước 3: Chuyển hướng đến trang thanh toán VNPay
       window.location.href = paymentUrl;
-
     } catch (error) {
       console.error("Lỗi quy trình thanh toán:", error);
       toast.error((error as Error).message || "Có lỗi xảy ra trong quá trình thanh toán", {
@@ -113,6 +107,50 @@ export default function CartPage() {
         },
         icon: '❌',
       });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  // QR Payment: handle after user clicks 'Đã thanh toán xong'
+  const handleQRPaymentDone = async () => {
+    if (!user) {
+      toast.error("Vui lòng đăng nhập để thanh toán");
+      return;
+    }
+    try {
+      setIsProcessing(true);
+      const orderData = {
+        userId: {
+          _id: user._id,
+          fullName: user.fullName,
+        },
+        items: items.map(item => ({
+          id: item.id,
+          name: item.name,
+          image: item.image,
+          category: item.category,
+          price: item.price,
+          quantity: item.quantity
+        })),
+        totalAmount: totalAmount,
+        status: "Đang chờ xác nhận thanh toán", // Special status for QR
+      };
+      const saveOrderResponse = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(orderData)
+      });
+      if (!saveOrderResponse.ok) {
+        throw new Error("Lỗi khi lưu đơn hàng");
+      }
+      setShowQROverlay(false);
+      toast.success("Đơn hàng đã được tạo. Đang chờ xác nhận thanh toán.");
+      router.push("/payment/result?status=qr_waiting");
+    } catch (error) {
+      toast.error((error as Error).message || "Có lỗi khi tạo đơn hàng");
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -272,7 +310,34 @@ export default function CartPage() {
 
           {/* Right: Order Summary */}
           <div className="lg:col-span-1">
-            <CartSummary totalAmount={totalAmount} onCheckout={handlePayment} />
+            <CartSummary 
+              totalAmount={totalAmount} 
+              onCheckout={handlePayment} 
+              paymentMethod={paymentMethod}
+              setPaymentMethod={setPaymentMethod}
+              isProcessing={isProcessing}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* QR Overlay */}
+      {showQROverlay && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+          <div className="bg-white rounded-lg p-8 flex flex-col items-center relative min-w-[350px]">
+            <button className="absolute top-2 right-2 text-gray-500 hover:text-black" onClick={() => setShowQROverlay(false)}>
+              <X className="w-6 h-6" />
+            </button>
+            <h2 className="text-xl font-bold mb-4">Quét mã QR để thanh toán</h2>
+            <Image src="/images/QRThanhToan.jpg" alt="QR Thanh Toán" width={250} height={250} className="mb-4" />
+            <Button 
+              className="w-full bg-[#FB8501] hover:bg-[#ffb703] text-white font-bold text-lg py-3 mt-2"
+              onClick={handleQRPaymentDone}
+              disabled={isProcessing}
+            >
+              {isProcessing ? 'Đang xử lý...' : 'Đã thanh toán xong'}
+            </Button>
+            <p className="text-sm text-gray-500 mt-2">Sau khi chuyển khoản, nhấn "Đã thanh toán xong" để hoàn tất đơn hàng.</p>
           </div>
         </div>
       )}
@@ -281,7 +346,7 @@ export default function CartPage() {
 }
 
 // CartSummary component for right column
-function CartSummary({ totalAmount, onCheckout }: { totalAmount: number; onCheckout: () => void }) {
+function CartSummary({ totalAmount, onCheckout, paymentMethod, setPaymentMethod, isProcessing }: { totalAmount: number; onCheckout: () => void; paymentMethod: 'vnpay' | 'qr'; setPaymentMethod: (m: 'vnpay' | 'qr') => void; isProcessing: boolean }) {
   const [shipping, setShipping] = React.useState<number>(0);
   return (
     <div className="bg-[#e0f4ff] p-6 rounded-lg shadow sticky top-24">
@@ -308,6 +373,18 @@ function CartSummary({ totalAmount, onCheckout }: { totalAmount: number; onCheck
             </label>
           </div>
         </div>
+        {/* Payment method selection */}
+        <div className="flex flex-col gap-2 mt-4">
+          <span className="font-semibold">Chọn hình thức thanh toán</span>
+          <label className="flex items-center">
+            <input type="radio" name="paymentMethod" value="vnpay" checked={paymentMethod === 'vnpay'} onChange={() => setPaymentMethod('vnpay')} className="mr-2" />
+            VNPay (Khuyên dùng)
+          </label>
+          <label className="flex items-center">
+            <input type="radio" name="paymentMethod" value="qr" checked={paymentMethod === 'qr'} onChange={() => setPaymentMethod('qr')} className="mr-2" />
+            QR Thanh Toán (Chuyển khoản qua mã QR)
+          </label>
+        </div>
         <div className="border-t pt-2 mt-2">
           <div className="flex justify-between font-bold">
             <span>Tổng cộng:</span>
@@ -315,8 +392,8 @@ function CartSummary({ totalAmount, onCheckout }: { totalAmount: number; onCheck
           </div>
         </div>
       </div>
-      <Button className="w-full bg-[#FB8501] hover:bg-[#ffb703] text-white font-bold text-lg py-3 mt-4" onClick={onCheckout}>
-        TIẾN HÀNH THANH TOÁN
+      <Button className="w-full bg-[#FB8501] hover:bg-[#ffb703] text-white font-bold text-lg py-3 mt-4" onClick={onCheckout} disabled={isProcessing}>
+        {isProcessing ? 'Đang xử lý...' : 'TIẾN HÀNH THANH TOÁN'}
       </Button>
     </div>
   );
