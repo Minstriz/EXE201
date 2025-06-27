@@ -5,7 +5,7 @@ export async function POST(req: NextRequest) {
   if (!apiKey) {
     return NextResponse.json({ error: "Missing OpenAI API key" }, { status: 500 });
   }
-  const { messages } = await req.json();
+  const { messages, model } = await req.json();
   if (!messages || !Array.isArray(messages)) {
     return NextResponse.json({ error: "Missing messages array" }, { status: 400 });
   }
@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "gpt-3.5-turbo",
+        model: model || "gpt-3.5-turbo-0125",
         messages,
         temperature: 0.7,
         max_tokens: 1024,
