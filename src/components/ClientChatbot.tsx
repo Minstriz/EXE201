@@ -11,7 +11,7 @@ interface ChatMessage {
 
 export default function ClientChatbot() {
   const pathname = usePathname();
-  const isAdminPage = pathname.startsWith("/admin");
+  const isAdminPage = pathname?.startsWith("/admin");
   const [showChat, setShowChat] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
     { role: "assistant" as const, content: "Chào bạn! Tôi có thể giúp gì cho bạn?" },
