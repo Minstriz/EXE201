@@ -39,8 +39,9 @@ function NavBar() {
   const navBarData = [
     { title: "Trang chủ", link: "/" },
     { title: "Giới thiệu", link: "/about" },
-    { title: "Khám phá", link: "/explore" },
+    
     { title: "Sản phẩm", link: "/products" },
+    { title: "Khám phá", link: "/explore" },
     { title: "Liên hệ", link: "/contact" },
   ];
 

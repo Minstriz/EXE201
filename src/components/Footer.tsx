@@ -23,27 +23,27 @@ function Footer() {
           <h3 className="mb-4 text-sm font-semibold uppercase">Trang</h3>
           <ul className="space-y-2 text-sm">
             <li>
-              <Link href="#" className="hover:underline font-semibold">
+              <Link href="#" className="hover:underline font-medium">
                 Trang chủ
               </Link>
             </li>
             <li>
-              <Link href="#" className="hover:underline font-semibold">
+              <Link href="#" className="hover:underline font-medium">
                 Giới thiệu
               </Link>
             </li>
             <li>
-              <Link href="#" className="hover:underline font-semibold">
+              <Link href="#" className="hover:underline font-medium">
                 Khám phá
               </Link>
             </li>
             <li>
-              <Link href="#" className="hover:underline font-semibold">
+              <Link href="#" className="hover:underline font-medium">
                 Sản phẩm
               </Link>
             </li>
             <li>
-              <Link href="#" className="hover:underline font-semibold">
+              <Link href="#" className="hover:underline font-medium">
                 Giỏ hàng
               </Link>
             </li>
@@ -56,17 +56,17 @@ function Footer() {
           <ul className="text-sm space-y-1">
             <li className="text-gray-300">
               Điện thoại:{" "}
-              <span className="font-semibold text-white">(+84) 1234567890</span>
+              <span className="font-medium text-white">(+84) 1234567890</span>
             </li>
             <li className="text-gray-300">
               Email:{" "}
-              <span className="font-semibold text-white">
-                asaigon123@gmail.com
+              <span className="font-medium text-white">
+                asaigon2025@gmail.com
               </span>
             </li>
             <li className="text-gray-300">
               Location:{" "}
-              <span className="font-semibold text-white">
+              <span className="font-medium text-white">
                 Ho Chi Minh City - Viet Nam
               </span>
             </li>
@@ -82,9 +82,7 @@ function Footer() {
             <Link href="#" className="hover:text-[#FB8501]">
               <FaFacebookF />
             </Link>
-            <Link href="#" className="hover:text-[#FB8501]">
-              <FaInstagram />
-            </Link>
+
             <Link href="#" className="hover:text-[#FB8501]">
               <FaTiktok />
             </Link>
@@ -95,8 +93,8 @@ function Footer() {
       {/* Bottom section */}
       <div className="max-w-screen-xl mx-auto p-4 flex justify-between items-center">
         <div className="px-3 py-10 rounded flex items-center space-x-2 text-sm">
-    <LanguageToggle />
-</div>
+          <LanguageToggle />
+        </div>
 
         <span className="text-sm text-gray-300">
           © 2024 À Sài Gòn. All rights reserved.

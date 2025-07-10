@@ -24,7 +24,7 @@ const mockProducts: Product[] = [
   {
     id: 1,
     name: "Áo Thun Đen",
-    price: 200_000, // dùng dấu _ để dễ đọc, không ảnh hưởng giá trị
+    price: 199000, // dùng dấu _ để dễ đọc, không ảnh hưởng giá trị
     category: "Áo Thun",
     slug: "ao-thun-den",
     mainImage: "/images/19.png", // local trong thư mục /public/images
@@ -49,7 +49,7 @@ const mockProducts: Product[] = [
   {
     id: 2,
     name: "Áo Thun Xanh",
-    price: 450000,
+    price: 199000,
     category: "Áo Thun",
     slug: "ao-thun-xanh",
     mainImage: "/images/20.png", // ← thay bằng local
@@ -68,7 +68,7 @@ const mockProducts: Product[] = [
   {
     id: 3,
     name: "Áo Thun Trắng",
-    price: 450000,
+    price: 199000,
     category: "Áo Thun",
     slug: "ao-thun-trang",
     mainImage: "/images/21.png", // ← thay bằng local
@@ -86,7 +86,7 @@ const mockProducts: Product[] = [
   {
     id: 4,
     name: "Túi Tote Xanh",
-    price: 500000,
+    price: 149000,
     category: "Túi tote",
     slug: "tui-tote-xanh",
     mainImage: "/images/23.png", // ← thay bằng local
@@ -105,7 +105,7 @@ const mockProducts: Product[] = [
   {
     id: 5,
     name: "Túi Tote Đen",
-    price: 210000,
+    price: 149000,
     category: "Túi tote",
     slug: "tui-tote-den",
     mainImage: "/images/23.png", // ← thay bằng local
@@ -123,7 +123,7 @@ const mockProducts: Product[] = [
   {
     id: 6,
     name: "Sticker Trái Tim",
-    price: 400000,
+    price: 49000,
     category: "Sticker",
     slug: "sticker-trai-tim",
     mainImage: "/images/25.png", // ← thay bằng local
@@ -141,7 +141,7 @@ const mockProducts: Product[] = [
   {
     id: 7,
     name: "Sticker Ngôi Sao",
-    price: 300000,
+    price: 49000,
     category: "Sticker",
     slug: "sticker-ngoi-sao",
     mainImage: "/images/25.png", // ← thay bằng local
@@ -159,7 +159,7 @@ const mockProducts: Product[] = [
   {
     id: 8,
     name: "Sticker Hoa Hồng",
-    price: 350000,
+    price: 49000,
     category: "Sticker",
     slug: "sticker-hoa-hong",
     mainImage: "/images/25.png", // ← thay bằng local

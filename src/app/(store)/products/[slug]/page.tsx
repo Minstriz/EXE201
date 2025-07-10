@@ -20,7 +20,6 @@ import Image from "next/image";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import { Product } from "@/types/product";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/app/context/CartContext";
 
@@ -38,13 +37,16 @@ function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
   const [showFullDescription, setShowFullDescription] = useState(false);
 
   // Logic tính toán này cũng nên nằm ở đây hoặc trong useEffect/useMemo
-  const descriptionPreview = product?.description && product.description.length > 200 && !showFullDescription
-    ? product.description.substring(0, 200) + '...'
-    : product?.description || '';
+  const descriptionPreview =
+    product?.description &&
+    product.description.length > 200 &&
+    !showFullDescription
+      ? product.description.substring(0, 200) + "..."
+      : product?.description || "";
 
   // Tính toán ratingCounts cũng nên ở đây
   const ratingCounts = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-  product?.reviews?.forEach(review => {
+  product?.reviews?.forEach((review) => {
     if (review.rating >= 1 && review.rating <= 10) {
       ratingCounts[review.rating]++;
     }
@@ -120,9 +122,9 @@ function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
   };
 
   return (
-    <div className="container mx-auto pt-[50px]">
+    <div className="container mx-auto pt-[50px] px-4 lg:px-8">
       {/* Breadcrumb */}
-      <div className="mb-5 md:mb-10 ml-5 lg:ml-0">
+      <div className="mb-5 md:mb-10 px-4 lg:px-0">
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
@@ -143,9 +145,9 @@ function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
       </div>
 
       {/* Nội dung sản phẩm */}
-      <div className="flex flex-col-reverse items-start lg:flex-row">
+      <div className="flex flex-col-reverse items-start lg:flex-row justify-center lg:gap-20">
         {/* Chi tiết sản phẩm */}
-        <div className="lg:w-1/2 py-5 lg:py-0">
+        <div className="lg:w-[460px] w-full py-5 lg:py-0">
           <div className="flex items-start gap-5">
             <h1 className="text-2xl font-bold mb-2">
               {product.name.toUpperCase()}
@@ -159,11 +161,12 @@ function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
           <div className="mt-4">
             <span className="block text-sm text-gray-600">Màu sắc:</span>
             <div className="flex space-x-2 mt-2">
-              {product.colors && product.colors.map((color) => (
+              {product.colors?.map((color) => (
                 <div
                   key={color.value}
-                  className={`w-6 h-6 rounded-full border cursor-pointer ${selectedColor === color.value ? "ring-2 ring-black" : ""
-                    }`}
+                  className={`w-6 h-6 rounded-full border cursor-pointer ${
+                    selectedColor === color.value ? "ring-2 ring-black" : ""
+                  }`}
                   style={{ backgroundColor: color.value }}
                   onClick={() => setSelectedColor(color.value)}
                   title={color.label}
@@ -176,19 +179,37 @@ function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
           <div className="mt-4">
             <span className="block text-sm text-gray-600">Kích thước:</span>
             <div className="flex space-x-2 mt-2">
-              {product.sizes && product.sizes.map((size) => (
+              {product.sizes?.map((size) => (
                 <button
                   key={size}
-                  className={`px-4 py-2 border rounded cursor-pointer ${selectedSize === size
-                    ? "bg-black text-white border-black"
-                    : "border-gray-400"
-                    }`}
+                  className={`px-4 py-2 border rounded cursor-pointer ${
+                    selectedSize === size
+                      ? "bg-black text-white border-black"
+                      : "border-gray-400"
+                  }`}
                   onClick={() => setSelectedSize(size)}
                 >
                   {size}
                 </button>
               ))}
             </div>
+          </div>
+
+          {/* Mô tả sản phẩm */}
+          <div className="mt-4">
+            <span className="block text-sm text-gray-600">Mô tả:</span>
+            <p className="text-base text-gray-800">
+              {descriptionPreview}
+              {product?.description && product.description.length > 200 && (
+                <button
+                  type="button"
+                  className="ml-2 text-[#219EBC] underline text-sm"
+                  onClick={() => setShowFullDescription((prev) => !prev)}
+                >
+                  {showFullDescription ? "Thu gọn" : "Xem thêm"}
+                </button>
+              )}
+            </p>
           </div>
 
           {/* Giá sản phẩm */}
@@ -215,7 +236,7 @@ function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
         </div>
 
         {/* Hình ảnh sản phẩm */}
-        <div className="lg:w-1/2 lg:pl-8 mt-8 lg:mt-0 relative">
+        <div className="lg:w-[440px] lg:pl-10 mt-8 lg:mt-0 relative">
           <div className="relative w-[400px] h-[400px] mx-auto">
             <Image
               alt={product.name}
@@ -224,17 +245,18 @@ function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
               width={400}
               height={400}
             />
-            {/* Nút yêu thích */}
             <HeartIcon
-              className={`w-8 h-8 absolute top-4 right-4 cursor-pointer transition ${favorites.some((fav) => fav.id === product.id)
-                ? "text-red-500 fill-red-500"
-                : "text-white"
-                }`}
+              className={`w-8 h-8 absolute top-4 right-4 cursor-pointer transition ${
+                favorites.some((fav) => fav.id === product.id)
+                  ? "text-red-500 fill-red-500"
+                  : "text-white"
+              }`}
               onClick={handleToggleFavorite}
             />
           </div>
-          {/* Product Image Gallery (Slider) */}
-          {product.images && product.images.length > 0 && (
+
+          {/* Gallery */}
+          {product.images?.length > 0 && (
             <div className="mt-6 w-[400px] mx-auto">
               <Slider {...sliderSettings}>
                 {product.images.map((img, index) => (
@@ -253,79 +275,126 @@ function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
           )}
         </div>
       </div>
-      {/* Product Description */}
-      <div className="mt-10 px-5 lg:px-0">
-        <h2 className="text-xl font-bold text-[#219EBC] mb-4">Về sản phẩm</h2>
-        <p className="text-gray-700 leading-relaxed">
-          {descriptionPreview}
-        </p>
-        {product.description && product.description.length > 200 && (
-          <button
-            onClick={() => setShowFullDescription(!showFullDescription)}
-            className="text-[#219EBC] font-semibold mt-3 hover:underline"
-          >
-            {showFullDescription ? "Thu gọn" : "Xem thêm"}
-          </button>
-        )}
-      </div>
 
-      <div className="flex flex-col items-start justify-between gap-10 ">
-        {/* Product Reviews Section */}
-        <div className="mt-10 px-5 lg:px-0 w-full flex flex-col">
-          <h2 className="text-xl font-bold text-[#219EBC] mb-4">Đánh giá</h2>
-          <div className="flex flex-col md:flex-col items-center md:items-start gap-8">
-            <div className="w-full flex justify-center items-center">
-              {/* Average Rating Circle */}
-              <div className="flex flex-col pd-20 items-center justify-center p-6 bg-white rounded-full shadow-lg w-32 h-32 flex-shrink-0">
-                <p className="text-4xl font-bold text-[#FB8501]">{product.averageRating.toFixed(1)}/10</p>
-                <p className="text-sm text-gray-600 mt-1">Xuất sắc</p>
-                <p className="text-xs text-gray-500">{product.numOfReviews} đánh giá</p>
+      {/* Container chung */}
+      <div className="w-full flex justify-center">
+        <div className="w-full max-w-[80%]">
+          {/* Tiêu đề Đánh giá */}
+          <div className="mt-10 w-full">
+            <h2 className="text-xl font-bold text-[#219EBC] mb-6">Đánh giá</h2>
+            <div className="flex flex-col md:flex-row items-start md:items-center gap-10 w-full">
+              {/* Trái: điểm trung bình */}
+              <div className="flex flex-col items-center justify-center">
+                <div className="relative w-32 h-32 flex items-center justify-center">
+                  <svg
+                    className="w-full h-full transform -rotate-90"
+                    viewBox="0 0 100 100"
+                  >
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r="45"
+                      stroke="#D9D9D9"
+                      strokeWidth="10"
+                      fill="none"
+                    />
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r="45"
+                      stroke="#219EBC"
+                      strokeWidth="10"
+                      fill="none"
+                      strokeDasharray="283"
+                      strokeDashoffset={
+                        283 - (283 * product.averageRating) / 10
+                      }
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                  <div className="absolute text-center">
+                    <p className="text-3xl font-bold text-[#FB8501]">
+                      {product.averageRating.toFixed(1)}
+                      <span className="text-base font-normal text-black">
+                        /10
+                      </span>
+                    </p>
+                    <p className="text-sm text-gray-600">Xuất sắc</p>
+                    <p className="text-xs text-gray-500">
+                      {product.numOfReviews} đánh giá
+                    </p>
+                  </div>
+                </div>
               </div>
-            </div>
 
-            {/* Rating Breakdown Bars */}
-            <div className="flex-grow w-full max-w-md">
-              <div className="grid grid-cols-1 gap-2 text-sm">
-                {[10, 9, 8, 7, 6, 5, 4, 3, 2, 1].map((rating) => {
-                  const count = product.reviews ? ratingCounts[rating] || 0 : 0;
-                  const percentage = product.numOfReviews > 0 ? (count / product.numOfReviews) * 100 : 0;
-                  return (
-                    <React.Fragment key={rating}>
-                      <div className="text-gray-600 text-right pr-2">{rating} / 10</div>
-                      <div className="flex items-center">
-                        <div className="w-full bg-gray-200 rounded-full h-2.5">
-                          <div
-                            className="bg-[#219EBC] h-2.5 rounded-full"
-                            style={{ width: `${percentage}%` }}
-                          ></div>
-                        </div>
+              {/* Phải: biểu đồ thang điểm */}
+              <div className="flex-grow w-full">
+                <div className="flex flex-col gap-3 text-sm">
+                  {[
+                    { label: "9-10", value: 100 },
+                    { label: "7-8", value: 60 },
+                    { label: "5-6", value: 60 },
+                    { label: "3-4", value: 60 },
+                    { label: "1-2", value: 60 },
+                  ].map((item, idx) => (
+                    <div key={idx} className="flex items-center gap-2">
+                      <div className="w-[45px] text-right text-[#1A1A1A]">
+                        {item.label}
                       </div>
-                    </React.Fragment>
-                  );
-                })}
+                      <div className="flex-1 bg-[#D9D9D9] h-[10px] rounded-full">
+                        <div
+                          className="h-[10px] rounded-full bg-[#219EBC]"
+                          style={{ width: `${item.value}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <div className="mt-8 text-center">
-          <button className="bg-[#219EBC] text-white font-bold py-2 px-6 rounded-[7px] hover:bg-[#197ba3]">
-            XEM TOÀN BỘ ĐÁNH GIÁ
-          </button>
-        </div>
-        <div className="mt-4 flex justify-start mb-2 flex-col">
-          <textarea
-            className="w-full max-w-2xl p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#219EBC]"
-            rows={4}
-            placeholder="Viết đánh giá của bạn..."
-          ></textarea>
-          <div className="mt-8 text-start">
-            <button className="bg-[#219EBC] text-white font-bold py-2 px-6 rounded-[7px] hover:bg-[#197ba3]">
-              Đánh giá
-            </button>
+          {/* Ghi chú + Viết đánh giá + Textarea */}
+          <div className="mt-10">
+            {/* Ghi chú */}
+            <p className="text-sm text-gray-500">
+              Chỉ những khách đã mua sản phẩm qua À Sài Gòn mới có thể để lại
+              đánh giá.
+            </p>
+
+            {/* Tiêu đề */}
+            <h3 className="mt-4 text-base font-semibold text-[#1A1A1A]">
+              Đánh giá từ khách hàng thực tế
+            </h3>
+
+            {/* Nút Viết đánh giá */}
+            <div className="w-full flex justify-start mt-4">
+              <button className="bg-[#219EBC] text-white font-semibold py-2 px-4 rounded-full text-sm">
+                Viết đánh giá
+              </button>
+            </div>
+
+            {/* Nút Xem toàn bộ đánh giá ở giữa */}
+            <div className="w-full flex justify-center mt-4">
+              <button className="border border-[#219EBC] text-[#219EBC] font-bold py-3 px-6 rounded-[8px] text-sm hover:bg-[#219EBC] hover:text-white transition">
+                XEM TOÀN BỘ ĐÁNH GIÁ
+              </button>
+            </div>
+
+            {/* Textarea */}
+            <div className="mt-6">
+              <textarea
+                className="w-full p-4 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#219EBC]"
+                rows={4}
+                placeholder="Viết đánh giá của bạn..."
+              ></textarea>
+            </div>
           </div>
         </div>
       </div>
+
+      <br></br>
+      <br></br>
     </div>
   );
 }

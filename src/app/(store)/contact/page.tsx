@@ -7,7 +7,7 @@ function ContactPage() {
   return (
     <div className="pt-[120px] bg-white">
       <div className="max-w-6xl mx-auto p-6">
-        <h1 className="text-center text-[#FB8501] text-2xl font-bold mb-6 uppercase">
+        <h1 className="text-center text-orange-400 text-2xl font-bold mb-6 uppercase">
           Liên hệ và trợ giúp
         </h1>
 
@@ -23,7 +23,7 @@ function ContactPage() {
                 <i className="fas fa-phone-alt mr-2"></i> (+84) 1234567890
               </p>
               <p className="mb-2 flex items-center">
-                <i className="fas fa-envelope mr-2"></i> asaigon123@gmail.com
+                <i className="fas fa-envelope mr-2"></i> asaigon2025@gmail.com
               </p>
               <p className="mb-2 flex items-center">
                 <i className="fas fa-map-marker-alt mr-2"></i> Ho Chi Minh City
@@ -33,12 +33,7 @@ function ContactPage() {
                 <Link href="#" className="text-gray-600 hover:text-[#1877f2]">
                   <FaFacebookF size={20} />
                 </Link>
-                <Link href="#" className="text-gray-600 hover:text-[#E4405F]">
-                  <FaInstagram size={20} />
-                </Link>
-                <Link href="#" className="text-gray-600 hover:text-[#FF0000]">
-                  <FaYoutube size={20} />
-                </Link>
+
                 <Link href="#" className="text-gray-600 hover:text-black">
                   <FaTiktok size={20} />
                 </Link>
