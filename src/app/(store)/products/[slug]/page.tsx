@@ -17,7 +17,7 @@ import {
 import toast from "react-hot-toast";
 import { useWishlistStore } from "@/store/useWhistlist";
 import Image from "next/image";
-import Slider from "react-slick";
+/* import Slider from "react-slick"; */
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { useRouter } from "next/navigation";
@@ -107,7 +107,7 @@ function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
     );
   };
 
-  const sliderSettings = {
+/*   const sliderSettings = {
     dots: true,
     infinite: true,
     speed: 500,
@@ -119,7 +119,7 @@ function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
       { breakpoint: 768, settings: { slidesToShow: 2 } },
       { breakpoint: 480, settings: { slidesToShow: 1 } },
     ],
-  };
+  }; */
 
   return (
     <div className="container mx-auto pt-[50px] px-4 lg:px-8">
@@ -145,7 +145,7 @@ function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
       </div>
 
       {/* Nội dung sản phẩm */}
-      <div className="flex flex-col-reverse items-start lg:flex-row justify-center lg:gap-20">
+      <div className="flex flex-col-reverse items-start lg:flex-row justify-between lg:gap-30">
         {/* Chi tiết sản phẩm */}
         <div className="lg:w-[460px] w-full py-5 lg:py-0">
           <div className="flex items-start gap-5">
@@ -256,7 +256,7 @@ function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
           </div>
 
           {/* Gallery */}
-          {product.images?.length > 0 && (
+{/*           {product.images?.length > 0 && (
             <div className="mt-6 w-[400px] mx-auto">
               <Slider {...sliderSettings}>
                 {product.images.map((img, index) => (
@@ -272,12 +272,12 @@ function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
                 ))}
               </Slider>
             </div>
-          )}
+          )} */}
         </div>
       </div>
 
       {/* Container chung */}
-      <div className="w-full flex justify-center">
+      <div className="w-full flex justify-start mt-20">
         <div className="w-full max-w-[80%]">
           {/* Tiêu đề Đánh giá */}
           <div className="mt-10 w-full">

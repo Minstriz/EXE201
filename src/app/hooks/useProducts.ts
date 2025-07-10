@@ -23,20 +23,20 @@ interface Product {
 const mockProducts: Product[] = [
   {
     id: 1,
-    name: "Áo Thun Đen",
-    price: 199000, // dùng dấu _ để dễ đọc, không ảnh hưởng giá trị
+    name: "Áo Thun Trắng",
+    price: 199000, 
     category: "Áo Thun",
-    slug: "ao-thun-den",
-    mainImage: "/images/19.png", // local trong thư mục /public/images
-    images: ["/images/19.png", "/images/ao-thun-den-2.png", "/images/ao-thun-den-3.png"], // Example additional images
+    slug: "ao-thun-trang",
+    mainImage: "/images/19.png", 
+    images: ["/images/19.png", "/images/anh_phu/NHÀ HÁT THÀNH PHỐ.png", "/images/anh_phu/CHỢ BẾN THÀNH.png"],
     description:
-      "Áo thun đen basic, chất liệu cotton 100%, form rộng thoải mái, thoáng mát, phù hợp với mọi hoạt động hàng ngày. Thiết kế đơn giản, dễ phối đồ, là lựa chọn hoàn hảo cho tủ đồ của bạn.",
+      "Áo thun trắng basic, chất liệu cotton 100%, form rộng thoải mái, thoáng mát, phù hợp với mọi hoạt động hàng ngày. Thiết kế đơn giản, dễ phối đồ, là lựa chọn hoàn hảo cho tủ đồ của bạn.",
     colors: [
-      { value: "#000000", label: "Đen" }, // Using hex codes for consistency
+      { value: "#000000", label: "Đen" }, 
       { value: "#CCCCCC", label: "Xám be" },
       { value: "#219EBC", label: "Xanh ngọc" },
     ],
-    sizes: ["35 CM", "40 CM"], // Example sizes based on your UI image
+    sizes: ["35 CM", "40 CM"], 
     inStock: true,
     averageRating: 9.7,
     numOfReviews: 3,
@@ -48,13 +48,13 @@ const mockProducts: Product[] = [
   },
   {
     id: 2,
-    name: "Áo Thun Xanh",
+    name: "Áo Thun Đen",
     price: 199000,
     category: "Áo Thun",
-    slug: "ao-thun-xanh",
+    slug: "ao-thun-den",
     mainImage: "/images/20.png", // ← thay bằng local
     images: ["/images/20.png", "/images/ao-thun-xanh-2.png"],
-    description: "Áo thun màu xanh tươi mát, mang lại cảm giác dễ chịu khi mặc. Chất liệu vải mềm mại, không nhăn, phù hợp cho cả nam và nữ.",
+    description: "Áo thun màu đen tươi mát, mang lại cảm giác dễ chịu khi mặc. Chất liệu vải mềm mại, không nhăn, phù hợp cho cả nam và nữ.",
     colors: [
       { value: "#0000FF", label: "Xanh dương" },
       { value: "#008000", label: "Xanh lá" },
@@ -85,13 +85,13 @@ const mockProducts: Product[] = [
   },
   {
     id: 4,
-    name: "Túi Tote Xanh",
+    name: "Túi Tote Nhà Thờ Đức Bà",
     price: 149000,
     category: "Túi tote",
-    slug: "tui-tote-xanh",
-    mainImage: "/images/23.png", // ← thay bằng local
-    images: ["/images/23.png", "/images/tui-tote-xanh-2.png"],
-    description: "Túi tote tiện lợi, màu xanh trẻ trung, không gian rộng rãi chứa nhiều đồ dùng cá nhân. Phù hợp đi học, đi làm, đi chơi.",
+    slug: "tui-tote-nha-tho-duc-ba",
+    mainImage: "/images/anh_phu/NHÀ THỜ ĐỨC BÀ copy.png",
+    images: ["/images/anh_phu/NHÀ THỜ ĐỨC BÀ copy.png", "/images/anh_phu/NHÀ THỜ ĐỨC BÀ copy.png"],
+    description: "Túi tote tiện lợi, màu trẻ trung, không gian rộng rãi chứa nhiều đồ dùng cá nhân. Phù hợp đi học, đi làm, đi chơi.",
     colors: [
       { value: "#00FFFF", label: "Xanh ngọc" },
       { value: "#0000FF", label: "Xanh dương" },
@@ -104,7 +104,7 @@ const mockProducts: Product[] = [
   },
   {
     id: 5,
-    name: "Túi Tote Đen",
+    name: "Túi Tote Chợ Bình Tây",
     price: 149000,
     category: "Túi tote",
     slug: "tui-tote-den",
@@ -158,13 +158,31 @@ const mockProducts: Product[] = [
   },
   {
     id: 8,
-    name: "Sticker Hoa Hồng",
+    name: "Sticker Mới",
     price: 49000,
     category: "Sticker",
     slug: "sticker-hoa-hong",
-    mainImage: "/images/25.png", // ← thay bằng local
-    images: ["/images/25.png"],
+    mainImage: "/images/anh_phu/STICKER.png", // ← thay bằng local
+    images: ["/images/anh_phu/STICKER.png"],
     description: "Sticker hình hoa hồng nghệ thuật, thích hợp cho những ai yêu thích vẻ đẹp lãng mạn. Dễ dàng bóc dán, không gây hư hại bề mặt.",
+    colors: [
+      { value: "#FFC0CB", label: "Hồng" },
+    ],
+    sizes: ["One Size"],
+    inStock: true,
+    averageRating: 9.5,
+    numOfReviews: 0,
+    reviews: [],
+  },
+  {
+    id: 9,
+    name: "Túi tote Dinh Độc Lập",
+    price: 49000,
+    category: "Sticker",
+    slug: "tui-tote-dinh-doc-lap",
+    mainImage: "/images/anh_phu/DINH ĐỘC LẬP copy.png",
+    images: ["/images/anh_phu/DINH ĐỘC LẬP copy.png"],
+    description: "Túi tote Dinh Độc Lập, phong cách trẻ trung, dễ dàng phối hợp với nhiều trang phục. Chất liệu canvas bền bỉ.",
     colors: [
       { value: "#FFC0CB", label: "Hồng" },
     ],
