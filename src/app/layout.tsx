@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Montserrat } from "next/font/google";
 import "./globals.css";
 import ClientLayout from "./ClientLayout";
 import ClientChatbot from "@/components/ClientChatbot";
 
-const inter = Inter({ subsets: ["latin"] });
+const montserrat = Montserrat({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"], // <– thêm 600, 700 để hỗ trợ medium và bold
+});
+
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -18,7 +22,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={montserrat.className}>
         <ClientLayout>{children}</ClientLayout>
 
         {/* Chatbot Icon & Chat Window (hide on admin pages) */}

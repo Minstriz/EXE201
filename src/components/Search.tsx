@@ -67,7 +67,10 @@ function SearchSection() {
                 img: "/images/baotangmythuat.png",
               },
             ].map((place, index) => (
-              <div key={index} className="text-center flex-shrink-0 w-64">
+              <div
+                key={index}
+                className="text-center flex-shrink-0 w-64 mr-6 last:mr-0"
+              >
                 <Image
                   src={place.img}
                   alt={place.title}
@@ -75,11 +78,9 @@ function SearchSection() {
                   width={256}
                   height={384}
                 />
-                <h3 className="mt-2 text-lg font-bold text-gray-800">
-    <span className="mt-7 text-lg font-bold text-[#023048]"></span>
-    {place.title}
-</h3>
-
+                <h3 className="mt-4 text-center text-base lg:text-lg font-semibold tracking-tight text-[#023048] uppercase">
+                  {place.title}
+                </h3>
               </div>
             ))}
           </div>
@@ -94,12 +95,12 @@ function SearchSection() {
             <ArrowRightIcon className="h-5 w-5 transform transition-transform duration-300 group-hover:translate-x-1" />
           </Link>
         </div>
-             {/* kẻ sọc */}
-          <div className="flex items-center w-full mt-6 px-48 gap-100">
-            <div className="flex-1 h-0.5 bg-[#023048]" />
-            <div className="flex-1 h-0.5 bg-[#023048]" />
-          </div>
-    
+        {/* kẻ sọc */}
+        <div className="flex items-center w-full mt-6 px-48 gap-100">
+          <div className="flex-1 h-0.5 bg-[#023048]" />
+          <div className="flex-1 h-0.5 bg-[#023048]" />
+        </div>
+
         {/* Sản phẩm mới */}
         <div className="mt-10 w-full flex flex-col items-center">
           {/* 3 sản phẩm */}
@@ -139,7 +140,6 @@ function SearchSection() {
           <div className="flex items-center gap-6 mt-6">
             <Link
               href="#"
-          
               className="bg-[#219EBC] text-white border border-[#219EBC] py-2 px-4 rounded-xl flex items-center gap-2 transition hover:bg-white hover:text-[#219EBC]"
             >
               Xem thêm sản phẩm
@@ -148,15 +148,12 @@ function SearchSection() {
             <span className="font-bold">HOẶC</span>
             <Link
               href="#"
-      
               className="bg-[#219EBC] text-white border border-[#219EBC] py-2 px-4 rounded-xl flex items-center gap-2 transition hover:bg-white hover:text-[#219EBC]"
             >
               Tự thiết kế sản phẩm của bạn
               <ArrowRightIcon className="h-5 w-5" />
             </Link>
           </div>
-
-         
         </div>
       </div>
     </section>

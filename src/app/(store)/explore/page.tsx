@@ -17,7 +17,7 @@ function ExplorePage() {
     <div className="pt-[120px] min-h-screen w-full bg-white">
       <div className="container mx-auto p-4">
         <div className="text-center mb-6">
-          <h1 className="text-orange-500 text-4xl font-bold">
+          <h1 className="text-orange-400 text-4xl font-bold">
             Ở SÀI GÒN ĐI ĐÂU?
           </h1>
         </div>
