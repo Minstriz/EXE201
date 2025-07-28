@@ -4,6 +4,7 @@ import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
+
 function SearchSection() {
   return (
     <section className="w-full">
@@ -53,35 +54,42 @@ function SearchSection() {
               {
                 title: "NHÀ THỜ TÂN ĐỊNH",
                 img: "/images/nhathotandinh.png",
+                slug: "nha-tho-tan-dinh",
               },
               {
-                title: "BƯU ĐIỆN THÀNH PHỐ",
+                title: "BUU ĐIỆN THÀNH PHỐ",
                 img: "/images/buudienthanhpho.png",
+                slug: "buu-dien-thanh-pho",
               },
               {
                 title: "CHỢ BẾN THÀNH",
                 img: "/images/chobenthanh.png",
+                slug: "cho-ben-thanh",
               },
               {
                 title: "BẢO TÀNG MỸ THUẬT",
                 img: "/images/baotangmythuat.png",
+                slug: "bao-tang-my-thuat",
               },
             ].map((place, index) => (
-              <div
+              <Link
+                href={`/blog/${place.slug}`}
                 key={index}
-                className="text-center flex-shrink-0 w-64 mr-6 last:mr-0"
+                className="group text-center flex-shrink-0 w-64 mr-6 last:mr-0 transform transition-transform duration-300 hover:scale-105 animate-shake"
               >
-                <Image
-                  src={place.img}
-                  alt={place.title}
-                  className="w-full rounded-lg h-96 object-cover"
-                  width={256}
-                  height={384}
-                />
-                <h3 className="mt-4 text-center text-base lg:text-lg font-semibold tracking-tight text-[#023048] uppercase">
+                <div className="shimmer-effect rounded-lg overflow-hidden">
+                  <Image
+                    src={place.img}
+                    alt={place.title}
+                    className="w-full h-96 object-cover transition duration-300 group-hover:brightness-110 group-hover:shadow-lg group-hover:ring-2 group-hover:ring-[#023048]"
+                    width={256}
+                    height={384}
+                  />
+                </div>
+                <h3 className="mt-4 text-center text-base lg:text-lg font-semibold tracking-tight text-[#023048] uppercase group-hover:text-[#02537a] transition-colors duration-300">
                   {place.title}
                 </h3>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
@@ -112,7 +120,7 @@ function SearchSection() {
                 img: "/images/tote-chobenthanh.png",
               },
               {
-                title: "(ÁO THUN) ĐỊNH ĐỘC LẬP",
+                title: "(ÁO THUN) DINH ĐỘC LẬP",
                 price: "199.000 VNĐ",
                 img: "/images/ao-dinhdoclap.png",
               },
@@ -139,7 +147,7 @@ function SearchSection() {
           {/* nút và chữ HOẶC */}
           <div className="flex items-center gap-6 mt-6">
             <Link
-              href="#"
+              href="products"
               className="bg-[#219EBC] text-white border border-[#219EBC] py-2 px-4 rounded-xl flex items-center gap-2 transition hover:bg-white hover:text-[#219EBC]"
             >
               Xem thêm sản phẩm

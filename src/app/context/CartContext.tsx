@@ -40,16 +40,19 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, [items]);
 
   const addToCart = (item: CartItem) => {
-    setItems((prevItems) => {
-      const existingItem = prevItems.find((i) => i.id === item.id);
-      if (existingItem) {
-        return prevItems.map((i) =>
-          i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
-        );
-      }
-      return [...prevItems, { ...item, quantity: 1 }];
-    });
-  };
+  setItems((prevItems) => {
+    const existingItem = prevItems.find((i) => i.id === item.id);
+    if (existingItem) {
+      // Nếu đã có thì cộng thêm số lượng mới
+      return prevItems.map((i) =>
+        i.id === item.id ? { ...i, quantity: i.quantity + item.quantity } : i
+      );
+    }
+    // Nếu chưa có, thêm item với đúng số lượng được truyền
+    return [...prevItems, { ...item }];
+  });
+};
+
 
   const removeFromCart = (id: string) => {
     setItems((prevItems) => prevItems.filter((item) => item.id !== id));

@@ -7,6 +7,7 @@ import { HeartIcon } from "@heroicons/react/24/solid";
 
 const reviews = [
   {
+    slug: "banh-mi-ca-phe",
     title: "BÁNH MÌ, CÀ PHÊ GÌ CHƯA NGƯỜI ĐẸP? ^^",
     content:
       "Sáng dậy sớm ngồi cà phê bệt ở nhà thờ Đức Bà, tay trái ổ bánh mì tay phải ly cà phê, ngon lành :))",
@@ -15,6 +16,7 @@ const reviews = [
     author: "minhsapoche",
   },
   {
+    slug: "dinh-doc-lap",
     title: "DINH ĐỘC LẬP ĐẸP HƠN TUI TƯỞNG Á MẤY NÍ",
     content:
       "Lần đầu tiên đi Dinh Độc Lập, đó giờ tưởng chỉ có bên ngoài đẹp, thì ra bên trong còn nhiều thứ hay hơn nữa á mấy ní...",
@@ -29,13 +31,19 @@ export default function Review() {
     <section className="w-full ">
       <div className="max-w-screen-xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-8">
         {reviews.map((r, idx) => (
-          <div
+          <Link
             key={idx}
-            className="bg-white rounded-xl shadow-md overflow-hidden flex flex-col md:flex-row"
+            href={`/blogReview/${r.slug}`}
+            className="group bg-white rounded-xl shadow-md overflow-hidden flex flex-col md:flex-row transform transition duration-300 hover:scale-105 hover:shadow-lg cursor-pointer no-underline"
           >
             {/* Hình ảnh luôn vuông */}
             <div className="relative w-full md:w-1/2 aspect-square">
-              <Image src={r.img} alt={r.title} fill className="object-cover" />
+              <Image
+                src={r.img}
+                alt={r.title}
+                fill
+                className="object-cover transition-transform duration-300 group-hover:scale-110"
+              />
             </div>
 
             {/* Nội dung */}
@@ -47,12 +55,7 @@ export default function Review() {
                 </p>
               </div>
               <div className="mt-6">
-                <Link
-                  href="#"
-                  className="text-[#FB8501] font-semibold hover:underline"
-                >
-                  XEM THÊM
-                </Link>
+                <p className="text-[#FB8501] font-semibold">XEM THÊM</p>
                 <div className="flex items-center text-sm text-gray-500 mt-4 gap-1">
                   <HeartIcon className="w-5 h-5 text-[#FB8501]" />
                   <span>
@@ -62,7 +65,7 @@ export default function Review() {
                 </div>
               </div>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
 
