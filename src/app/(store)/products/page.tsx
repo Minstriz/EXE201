@@ -1,3 +1,4 @@
+//giao diện 3 cái ở ngoài
 "use client";
 import React, { useState } from "react";
 import Slider from "react-slick";
@@ -17,14 +18,17 @@ function ProductPage() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   // Group products by category
-  const groupedProducts = products.reduce((acc: { [key: string]: Product[] }, product: Product) => {
-    const category = product.category;
-    if (!acc[category]) {
-      acc[category] = [];
-    }
-    acc[category].push(product);
-    return acc;
-  }, {});
+  const groupedProducts = products.reduce(
+    (acc: { [key: string]: Product[] }, product: Product) => {
+      const category = product.category;
+      if (!acc[category]) {
+        acc[category] = [];
+      }
+      acc[category].push(product);
+      return acc;
+    },
+    {}
+  );
 
   // Filter products based on selected category
   const filteredProducts = selectedCategory
@@ -179,25 +183,36 @@ function ProductPage() {
             </div>
 
             <div className="flex justify-center mt-6">
-              <button className="bg-[#219EBC] text-white font-bold border border-white w-[135px] h-[40px] rounded-[7px] hover:bg-[#197ba3] flex items-center justify-center gap-2">
-                Xem tất cả{" "}
-                <span className="inline-flex items-center">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={2.5}
-                    stroke="currentColor"
-                    className="w-4 h-4"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="m5.25 4.5 7.5 7.5-7.5 7.5m6-15 7.5 7.5-7.5 7.5"
-                    />
-                  </svg>
-                </span>
-              </button>
+              <Link
+                href={
+                  category.toLowerCase().includes("thun")
+                    ? "/products/all-tshirt"
+                    : category.toLowerCase().includes("tote")
+                    ? "/products/all-tote"
+                    : "/products/all-sticker"
+                }
+                passHref
+              >
+                <button className="bg-[#219EBC] text-white font-bold border border-white w-[135px] h-[40px] rounded-[7px] hover:bg-[#197ba3] flex items-center justify-center gap-2 transition duration-300 ease-in-out">
+                  Xem tất cả
+                  <span className="inline-flex items-center">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={2.5}
+                      stroke="currentColor"
+                      className="w-4 h-4"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="m5.25 4.5 7.5 7.5-7.5 7.5m6-15 7.5 7.5-7.5 7.5"
+                      />
+                    </svg>
+                  </span>
+                </button>
+              </Link>
             </div>
           </div>
         ))
