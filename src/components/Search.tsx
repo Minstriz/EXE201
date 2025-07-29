@@ -4,13 +4,50 @@ import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
+import { useProducts } from "@/app/hooks/useProducts";
+import { useState, useMemo, useEffect } from "react";
 
 function SearchSection() {
+  const { products } = useProducts();
+  const [keyword, setKeyword] = useState("");
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [placeholder, setPlaceholder] = useState("Tìm sản phẩm...");
+
+  const suggestions = useMemo(() => ["Tìm áo thun của À Sài Gòn",
+    "Tìm Sticker của À Sài Gòn",
+    "Tìm Túi tote của À Sài Gòn"], []
+  );
+
+  useEffect(() => {
+    let index = 0;
+    const interval = setInterval(() => {
+      index = (index + 1) % suggestions.length;
+      setPlaceholder(suggestions[index]);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [suggestions]);
+  // Normalize function for Vietnamese search
+  const normalize = (str: string) =>
+    str.toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
+
+  const filteredProducts = useMemo(() => {
+    if (!keyword.trim()) return [];
+
+    const normalizedKeyword = normalize(keyword);
+    const keywordParts = normalizedKeyword.split(" ").filter(Boolean); // tách từ
+
+    return products.filter((p) => {
+      const normalizedName = normalize(p.name);
+      return keywordParts.every((part) => normalizedName.includes(part));
+    });
+  }, [keyword, products]);
+
   return (
     <section className="w-full">
       <div className="pt-10 w-full flex flex-col items-center">
         {/* Ô tìm kiếm */}
-        <div className="relative w-3/4 md:w-1/2 lg:max-w-[900px] flex rounded-full border border-gray-300 overflow-hidden">
+        <div className="relative w-3/4 md:w-1/2 lg:max-w-[900px] flex rounded-full border border-gray-300">
           <div className="flex items-center px-3 transition-transform duration-300 transform hover:scale-125">
             <MagnifyingGlassIcon className="h-5 w-5 text-[#FB8501]" />
           </div>
@@ -18,11 +55,43 @@ function SearchSection() {
           <input
             className="w-full py-2 px-2 text-gray-700 bg-transparent border-none focus:outline-none focus:ring-0 caret-orange-500"
             type="text"
+            value={keyword}
+            onChange={(e) => {
+              setKeyword(e.target.value);
+              setShowDropdown(true);
+            }}
+            onFocus={() => setShowDropdown(true)}
+            onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
+            placeholder={placeholder}
           />
 
           <button className="bg-[#FB8501] text-white px-4 py-2 rounded-r-full transition-transform duration-300 transform hover:scale-110">
             Tìm
           </button>
+
+          {showDropdown && filteredProducts.length > 0 && (
+            <div className="absolute left-0 top-full w-full bg-white border border-gray-200 shadow-lg z-20 rounded-b-xl max-h-96 overflow-y-auto">
+              {filteredProducts.map((product) => (
+                <Link
+                  key={product.id}
+                  href={`/products/${product.slug}`}
+                  className="flex items-center gap-4 p-3 hover:bg-gray-100 transition"
+                >
+                  <Image
+                    src={product.mainImage}
+                    alt={product.name}
+                    width={50}
+                    height={50}
+                    className="w-12 h-12 object-cover rounded-md"
+                  />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-gray-800">{product.name}</p>
+                    <p className="text-xs text-gray-500">{product.price.toLocaleString()} VNĐ</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
         {/* Tìm kiếm phổ biến */}
         <h2 className="mt-6 text-xl font-bold text-[#219EBC]">

@@ -6,7 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useCart } from "@/app/context/CartContext";
 import { CartSidebar } from "./CartSidebar";
-import { Menu, ShoppingCart, UserCircle, Search } from "lucide-react";
+import { Menu, ShoppingCart, UserCircle } from "lucide-react";
 import { useAuth } from "@/app/context/AuthContext";
 import { toast } from "sonner";
 
@@ -82,9 +82,6 @@ function NavBar() {
             </div>
 
             <div className="hidden md:flex items-center space-x-4">
-              <button className="p-2 hover:bg-gray-100 rounded-full">
-                <Search className="h-5 w-5 text-gray-500" />
-              </button>
               <button 
                 onClick={() => setIsCartOpen(true)} 
                 className="p-2 hover:bg-gray-100 rounded-full relative"
