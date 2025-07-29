@@ -15,7 +15,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     setIsMounted(true);
   }, []);
 
-  const isAdmin = pathname.startsWith("/admin");
+  const isAdmin = pathname?.startsWith("/admin");
 
   return (
     <AuthProvider>

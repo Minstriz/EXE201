@@ -7,7 +7,7 @@ import { toast } from "sonner";
 const products = [
   {
     id: "aothun1",
-    name: "ÁO THUN TRẮNG",
+    name: "ÁO THUN SÀIGÒNNESE",
     price: 199000,
     category: "ÁO THUN",
     image: "/images/default/aothung/1.png",
@@ -15,7 +15,7 @@ const products = [
   },
   {
     id: "aothun2",
-    name: "ÁO THUN TRẮNG",
+    name: "ÁO THUN MÊ CƠM TẤM",
     price: 199000,
     category: "ÁO THUN",
     image: "/images/default/aothung/2.png",
@@ -23,7 +23,7 @@ const products = [
   },
   {
     id: "aothun3",
-    name: "ÁO THUN TRẮNG",
+    name: "ÁO THUN BÁNH MÌ FULL TOPPING",
     price: 199000,
     category: "ÁO THUN",
     image: "/images/default/aothung/3.png",
@@ -31,7 +31,7 @@ const products = [
   },
   {
     id: "aothun4",
-    name: "ÁO THUN TRẮNG",
+    name: "ÁO THUN CÀ PHÊ PHIN SỮA ĐÁ",
     price: 199000,
     category: "ÁO THUN",
     image: "/images/default/aothung/4.png",
@@ -40,7 +40,7 @@ const products = [
   },
   {
     id: "aothun5",
-    name: "ÁO THUN TRẮNG",
+    name: "ÁO THUN SGO-VN",
     price: 199000,
     category: "ÁO THUN",
     image: "/images/default/aothung/5.png",
@@ -48,7 +48,7 @@ const products = [
   },
   {
     id: "aothun6",
-    name: "ÁO THUN TRẮNG",
+    name: "ÁO THUN À SÀI GÒN",
     price: 199000,
     category: "ÁO THUN",
     image: "/images/default/aothung/6.png",

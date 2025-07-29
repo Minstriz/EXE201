@@ -17,7 +17,7 @@ import {
 import toast from "react-hot-toast";
 import { useWishlistStore } from "@/store/useWhistlist";
 import Image from "next/image";
-/* import Slider from "react-slick"; */
+import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { useRouter } from "next/navigation";
@@ -35,6 +35,7 @@ function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [showFullDescription, setShowFullDescription] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   // Logic tính toán này cũng nên nằm ở đây hoặc trong useEffect/useMemo
   const descriptionPreview =
@@ -57,6 +58,7 @@ function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
     if (product) {
       setSelectedColor(product.colors[0]?.value || null);
       setSelectedSize(product.sizes[0] || null);
+      setSelectedImage(product.mainImage || null);
     }
   }, [product]);
 
@@ -107,19 +109,19 @@ function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
     );
   };
 
-/*   const sliderSettings = {
+  const sliderSettings = {
     dots: true,
-    infinite: true,
+    infinite: product.images && product.images.length > 1,
     speed: 500,
-    slidesToShow: 4,
+    slidesToShow: product.images && product.images.length < 4 ? product.images.length : 4,
     slidesToScroll: 1,
     arrows: true,
     responsive: [
-      { breakpoint: 1024, settings: { slidesToShow: 3 } },
-      { breakpoint: 768, settings: { slidesToShow: 2 } },
+      { breakpoint: 1024, settings: { slidesToShow: product.images && product.images.length < 3 ? product.images.length : 3 } },
+      { breakpoint: 768, settings: { slidesToShow: product.images && product.images.length < 2 ? product.images.length : 2 } },
       { breakpoint: 480, settings: { slidesToShow: 1 } },
     ],
-  }; */
+  };
 
   return (
     <div className="container mx-auto pt-[50px] px-4 lg:px-8">
@@ -241,7 +243,7 @@ function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
             <Image
               alt={product.name}
               className="w-full h-full rounded-4xl object-contain"
-              src={product.mainImage}
+              src={selectedImage || product.mainImage}
               width={400}
               height={400}
             />
@@ -256,23 +258,37 @@ function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
           </div>
 
           {/* Gallery */}
-{/*           {product.images?.length > 0 && (
+          {product.images?.length > 0 && (
             <div className="mt-6 w-[400px] mx-auto">
-              <Slider {...sliderSettings}>
-                {product.images.map((img, index) => (
-                  <div key={index} className="px-1 cursor-pointer">
+              {product.images.length === 1 ? (
+                <div className="flex justify-center">
+                  <div className="px-1 cursor-pointer" onClick={() => setSelectedImage(product.images[0])}>
                     <Image
-                      src={img}
-                      alt={`${product.name} - ${index + 1}`}
+                      src={product.images[0]}
+                      alt={`${product.name} - 1`}
                       width={100}
                       height={100}
                       className="w-full h-auto object-fit rounded-md border border-gray-300"
                     />
                   </div>
-                ))}
-              </Slider>
+                </div>
+              ) : (
+                <Slider {...sliderSettings}>
+                  {product.images.map((img, index) => (
+                    <div key={index} className="px-1 cursor-pointer" onClick={() => setSelectedImage(img)}>
+                      <Image
+                        src={img}
+                        alt={`${product.name} - ${index + 1}`}
+                        width={100}
+                        height={100}
+                        className="w-full h-auto object-fit rounded-md border border-gray-300"
+                      />
+                    </div>
+                  ))}
+                </Slider>
+              )}
             </div>
-          )} */}
+          )} 
         </div>
       </div>
 

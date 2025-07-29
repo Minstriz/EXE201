@@ -7,7 +7,6 @@ import {
   FaUtensils,
   FaStar,
   FaHeart,
-  FaSearch,
 } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
 import FeedbackSection from "./FeedbackSection";
@@ -67,18 +66,6 @@ function ExplorePage() {
             >
               <FaHeart className="mr-1" /> Yêu thích
             </Button>
-          </div>
-
-          {/* khoảng trống 10% */}
-          <div className="hidden md:block md:w-1/10"></div>
-
-          <div className="flex items-center border border-[#219EBC] rounded-full px-4 py-2 w-full md:w-1/2 mt-2 md:mt-0 md:justify-end">
-            <FaSearch className="text-[#219EBC] mr-2" />
-            <input
-              type="text"
-              placeholder="Tìm kiếm"
-              className="outline-none bg-transparent text-[#219EBC] placeholder-[#219EBC] w-full"
-            />
           </div>
         </div>
 
