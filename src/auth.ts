@@ -3,11 +3,23 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 import { signInSchema } from "./lib/zod";
 
+
+declare module "next-auth" {
+  interface Session {
+    user: {
+      id?: string;
+      name?: string | null;
+      email?: string | null;
+      image?: string | null;
+    };
+  }
+}
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
     Google({
-      clientId: process.env.AUTH_GOOGLE_ID,
-      clientSecret: process.env.AUTH_GOOGLE_SECRET,
+      clientId: process.env.AUTH_GOOGLE_ID ?? (() => { throw new Error("Missing AUTH_GOOGLE_ID env variable"); })(),
+      clientSecret: process.env.AUTH_GOOGLE_SECRET ?? (() => { throw new Error("Missing AUTH_GOOGLE_SECRET env variable"); })(),
     }),
     CredentialsProvider({
       name: "credentials",

@@ -77,7 +77,9 @@ function Dashboard() {
   }).length;
 
   // Doanh thu tháng này
-  const revenueThisMonth = ordersThisMonthArr.reduce((sum, o) => sum + (o.totalAmount || 0), 0);
+ const revenueThisMonth = ordersThisMonthArr
+  .filter(o => o.status === "paid")
+  .reduce((sum, o) => sum + (o.totalAmount || 0), 0);
 
   // Thống kê sản phẩm bán chạy nhất
   const productSales: Record<string, { name: string; image: string; quantity: number }> = {};
