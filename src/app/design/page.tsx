@@ -14,11 +14,16 @@ const products = [
     image: "/images/tote/2.png",
     link: "/design/tote/customize",
   },
+  {
+    title:"Tự thiết kế",
+    image: "/images/black_white/aotrang.png",
+    link: "/design/create/",
+  }
 ];
 
 export default function DesignHomePage() {
   return (
-    <div className="min-h-screen px-4 pt-24 py-10 bg-white">
+    <div className="min-h-screen px-4 pt-5 py-10 bg-white">
       <h1 className="text-4xl font-extrabold text-center text-[#219EBC] mb-12">
         CHỌN SẢN PHẨM MUỐN THIẾT KẾ
       </h1>

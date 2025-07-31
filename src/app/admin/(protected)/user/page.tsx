@@ -119,7 +119,7 @@ const AdminUsersPage = () => {
     }
   };
 
-  const filteredUsers = users.filter(user => user.username.toLowerCase().includes(search.toLowerCase()));
+  const filteredUsers = users.filter(user => user.username?.toLowerCase().includes(search.toLowerCase()));
 
   if (loading) {
     return <div>Loading users...</div>;

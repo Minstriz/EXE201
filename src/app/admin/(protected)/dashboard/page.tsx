@@ -1,6 +1,7 @@
 "use client"
 import React, { useEffect, useState } from "react";
 
+import Image from "next/image";
 interface User {
   _id: string;
   username: string;
@@ -26,34 +27,31 @@ interface Order {
   createdAt: string;
 }
 
-interface Product {
+/* interface Product {
   _id: string;
   name: string;
   price: number;
   image: string;
   category: string;
-}
+} */
 
 function Dashboard() {
   const [users, setUsers] = useState<User[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
-  const [products, setProducts] = useState<Product[]>([]);
+  // const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-      const [userRes, orderRes, productRes] = await Promise.all([
+      const [userRes, orderRes] = await Promise.all([
         fetch("/api/admin/users"),
         fetch("/api/admin/orders"),
-        fetch("/api/products"),
       ]);
       const users = await userRes.json();
       const orders = await orderRes.json();
-      const products = await productRes.json();
       setUsers(users);
       setOrders(orders);
-      setProducts(products);
       setLoading(false);
     };
     fetchData();
@@ -92,7 +90,16 @@ function Dashboard() {
     });
   });
   const bestSeller = Object.values(productSales).sort((a, b) => b.quantity - a.quantity)[0];
-
+  //lấy thông tin users
+  const userStatsByMonth: number[] = Array(12).fill(0);
+  users.forEach(user => {
+    if (user.createdAt) {
+      const d = new Date(user.createdAt);
+      if (d.getFullYear() === currentYear) {
+        userStatsByMonth[d.getMonth()]++;
+      }
+    }
+  });
   return (
     <div className="container mx-auto py-8">
       <h1 className="text-3xl font-bold mb-8">Thống kê tổng quan</h1>
@@ -125,7 +132,16 @@ function Dashboard() {
       {/* Sản phẩm bán chạy nhất */}
       {!loading && bestSeller && (
         <div className="bg-white rounded shadow p-6 flex items-center gap-6 max-w-xl">
-          <img src={bestSeller.image} alt={bestSeller.name} className="w-24 h-24 object-contain rounded" />
+          <div className="relative w-24 h-24">
+            <Image
+              src={bestSeller.image}
+              alt={bestSeller.name}
+              fill
+              className="object-contain rounded"
+            />
+          </div>
+
+
           <div>
             <div className="text-lg font-bold">Sản phẩm bán chạy nhất</div>
             <div className="text-xl text-blue-700 font-bold mt-1">{bestSeller.name}</div>
@@ -133,26 +149,61 @@ function Dashboard() {
           </div>
         </div>
       )}
-      {/* Chart đơn giản mock */}
-      {!loading && (
-        <div className="mt-10">
-          <h2 className="text-lg font-bold mb-20">Biểu đồ số đơn hàng theo tháng (mock)</h2>
-          <div className="flex gap-2 items-end h-32">
-            {[...Array(12)].map((_, i) => {
-              const count = orders.filter(o => {
-                const d = new Date(o.createdAt);
-                return d.getMonth() === i && d.getFullYear() === currentYear;
-              }).length;
+      {/* Chart đơn hàng theo tháng */}
+      <div className="flex gap-10 justify-center  items-start mt-20">
+        {!loading && (
+          <div className="">
+            <h2 className="text-lg font-bold mb-6">Biểu đồ số đơn hàng theo tháng (năm {currentYear})</h2>
+            {(() => {
+              const orderCounts = [...Array(12)].map((_, i) =>
+                orders.filter(o => {
+                  const d = new Date(o.createdAt);
+                  return d.getMonth() === i && d.getFullYear() === currentYear;
+                }).length
+              );
+
+              const maxCount = Math.max(...orderCounts, 1); // tránh chia 0
+              const maxHeight = 120; // px
+
               return (
-                <div key={i} className="flex flex-col items-center">
-                  <div className="bg-blue-400 w-6" style={{ height: `${count * 8}px` }}></div>
-                  <div className="text-xs mt-1">{i + 1}</div>
+                <div className="flex gap-2 items-end h-[160px] pt-8">
+                  {orderCounts.map((count, i) => (
+                    <div key={i} className="flex flex-col items-center">
+                      <div className="text-sm mb-1 text-gray-700">{count}</div>
+                      <div
+                        className="bg-blue-500 w-6 rounded"
+                        style={{
+                          height: `${(count / maxCount) * maxHeight}px`,
+                        }}
+                      ></div>
+                      <div className="text-xs mt-1">{i + 1}</div>
+                    </div>
+                  ))}
                 </div>
               );
-            })}
+            })()}
           </div>
-        </div>
-      )}
+        )}
+        {!loading && (
+          <div className="flex-col">
+            <h2 className="text-lg font-bold mb-6">Số người dùng đăng ký theo tháng (năm {currentYear})</h2>
+            {/* Biểu đồ số người dùng đăng ký theo tháng */}
+            <div className="mt-16 pt-2">
+              <div className="flex gap-2 items-end h-32">
+                {userStatsByMonth.map((count, i) => (
+                  <div key={i} className="flex flex-col items-center">
+                    <div className="flex flex-col items-center">
+                      <div className="text-sm mb-1 text-gray-700">{count}</div>
+                      <div className="bg-green-500 w-6 rounded" style={{ height: `${count * 8}px` }}></div>
+                      <div className="text-xs mt-1">{i + 1}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
