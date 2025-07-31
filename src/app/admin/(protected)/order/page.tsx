@@ -108,8 +108,8 @@ const AdminOrdersPage = () => {
       const lowercasedSearchTerm = searchTerm.toLowerCase();
       filteredOrders = filteredOrders.filter(order =>
         order._id.toLowerCase().includes(lowercasedSearchTerm) ||
-        order.userId._id.toLowerCase().includes(lowercasedSearchTerm) ||
-        order.userId.fullName.toLowerCase().includes(lowercasedSearchTerm)
+        order.userId?._id.toLowerCase().includes(lowercasedSearchTerm) ||
+        order.userId?.fullName.toLowerCase().includes(lowercasedSearchTerm)
       );
     }
 
@@ -192,7 +192,7 @@ const AdminOrdersPage = () => {
               <tr key={order._id}>
                 <td className="py-2 px-4 border-b">{order._id}</td>
                 <td className="py-2 px-4 border-b">{order.userId?.fullName || order.userId?._id}</td>
-                <td className="py-2 px-4 border-b">{order.totalAmount.toLocaleString()} VND</td>
+                <td className="py-2 px-4 border-b">{order.totalAmount?.toLocaleString()} VND</td>
                 <td className={`py-2 px-4 border-b`}>
                   <select
                     value={order.status}

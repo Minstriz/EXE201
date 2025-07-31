@@ -81,7 +81,7 @@ export default function ClientChatbot() {
           <div className="flex items-center justify-between px-5 py-3 bg-gradient-to-r from-[#219EBC] to-[#23b6d7] text-white shadow-md">
             <div className="flex items-center gap-2">
               <Sparkles className="w-6 h-6 text-yellow-200" />
-              <span className="font-bold text-base">Chatbot hỗ trợ</span>
+              <span className="font-bold text-base">Trợ lý ảo À Sài Gòn</span>
             </div>
             <button onClick={() => setShowChat(false)} className="text-white hover:bg-[#197ba3] hover:text-yellow-200 text-2xl font-bold rounded-full w-8 h-8 flex items-center justify-center transition-all duration-150" aria-label="Đóng chatbot">×</button>
           </div>
@@ -129,7 +129,6 @@ export default function ClientChatbot() {
               Gửi
             </Button>
           </form>
-          <div className="text-xs text-gray-400 text-center py-1">(Powered by OpenAI GPT-3.5, cần API key)</div>
         </div>
       )}
     </>

@@ -1,12 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
-import { FaFacebookF, FaInstagram, FaTiktok } from "react-icons/fa";
+import { FaFacebookF, FaTiktok } from "react-icons/fa";
 import LanguageToggle from "./LanguageToggle";
 
 function Footer() {
   return (
-    <footer className="bg-[#023048] text-white">
+    <footer className="bg-[#023048] text-white mt-20">
       <div className="max-w-screen-xl mx-auto p-6 grid grid-cols-1 md:grid-cols-4 gap-8">
         {/* Logo */}
         <div>
