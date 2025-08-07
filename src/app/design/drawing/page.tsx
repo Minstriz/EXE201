@@ -13,7 +13,13 @@ export default function DrawingPage() {
     const [shadowWidth, setShadowWidth] = useState(0);
     const [shadowOffset, setShadowOffset] = useState(0);
     const [brushType, setBrushType] = useState('Pencil');
-
+    const [textValue, setTextValue] = useState('');
+    const [fontSize, setFontSize] = useState(24);
+    const [fontFamily, setFontFamily] = useState('Arial');
+    const [textAlign, setTextAlign] = useState<'left' | 'center' | 'right'>('left');
+    const [isBold, setIsBold] = useState(false);
+    const [isItalic, setIsItalic] = useState(false);
+    const [isUnderline, setIsUnderline] = useState(false);
     const createBrush = React.useCallback((canvas: fabric.Canvas, type: string): fabric.BaseBrush => {
         switch (type) {
             case 'hline': {
@@ -172,6 +178,113 @@ export default function DrawingPage() {
                                 {isDrawing ? 'Tắt Drawing Mode' : 'Bật Drawing Mode'}
                             </button>
                         </div>
+                        <div className="space-y-2">
+                            <label className="block font-medium">Thêm chữ vào canvas</label>
+                            <input
+                                type="text"
+                                value={textValue}
+                                onChange={(e) => setTextValue(e.target.value)}
+                                placeholder="Nhập nội dung..."
+                                className="w-full px-3 py-2 border border-gray-300 rounded"
+                            />
+
+                            {/* Font Family */}
+                            <select
+                                value={fontFamily}
+                                onChange={(e) => setFontFamily(e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded"
+                            >
+                                <option value="Arial">Arial</option>
+                                <option value="Times New Roman">Times New Roman</option>
+                                <option value="Courier New">Courier New</option>
+                                <option value="Georgia">Georgia</option>
+                                <option value="Comic Sans MS">Comic Sans MS</option>
+                            </select>
+
+                            {/* Font Size */}
+                            <input
+                                type="number"
+                                value={fontSize}
+                                onChange={(e) => setFontSize(Number(e.target.value))}
+                                className="w-full px-3 py-2 border border-gray-300 rounded"
+                                placeholder="Font Size"
+                            />
+
+                            {/* Text Style Toggle */}
+                            <div className="flex gap-2">
+                                <label className="flex items-center gap-1">
+                                    <input type="checkbox" checked={isBold} onChange={() => setIsBold(!isBold)} />
+                                    <span className="text-sm">Bold</span>
+                                </label>
+                                <label className="flex items-center gap-1">
+                                    <input type="checkbox" checked={isItalic} onChange={() => setIsItalic(!isItalic)} />
+                                    <span className="text-sm">Italic</span>
+                                </label>
+                                <label className="flex items-center gap-1">
+                                    <input type="checkbox" checked={isUnderline} onChange={() => setIsUnderline(!isUnderline)} />
+                                    <span className="text-sm">Underline</span>
+                                </label>
+                            </div>
+
+                            {/* Text Alignment */}
+                            <div className="flex gap-2">
+                                <button
+                                    className={`flex-1 py-1 rounded border ${textAlign === 'left' ? 'bg-indigo-500 text-white' : 'bg-white'} `}
+                                    onClick={() => setTextAlign('left')}
+                                >
+                                    Left
+                                </button>
+                                <button
+                                    className={`flex-1 py-1 rounded border ${textAlign === 'center' ? 'bg-indigo-500 text-white' : 'bg-white'} `}
+                                    onClick={() => setTextAlign('center')}
+                                >
+                                    Center
+                                </button>
+                                <button
+                                    className={`flex-1 py-1 rounded border ${textAlign === 'right' ? 'bg-indigo-500 text-white' : 'bg-white'} `}
+                                    onClick={() => setTextAlign('right')}
+                                >
+                                    Right
+                                </button>
+                            </div>
+
+                            <button
+                                onClick={() => {
+                                    if (!textValue.trim()) return;
+                                    const canvas = fabricCanvasRef.current;
+                                    if (!canvas) return;
+
+                                    const text = new fabric.IText(textValue, {
+                                        left: 100,
+                                        top: 100,
+                                        fill: color,
+                                        fontSize,
+                                        fontFamily,
+                                        fontWeight: isBold ? 'bold' : 'normal',
+                                        fontStyle: isItalic ? 'italic' : 'normal',
+                                        underline: isUnderline,
+                                        textAlign,
+                                        selectable: true,
+                                        shadow: new fabric.Shadow({
+                                            blur: shadowWidth,
+                                            offsetX: shadowOffset,
+                                            offsetY: shadowOffset,
+                                            affectStroke: true,
+                                            color: shadowColor,
+                                        }),
+                                    });
+
+                                    canvas.add(text);
+                                    canvas.setActiveObject(text);
+                                    canvas.renderAll();
+                                    setTextValue('');
+                                }}
+                                className="w-full py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition"
+                            >
+                                Thêm chữ
+                            </button>
+                        </div>
+
                         {/* Brush type */}
                         <div className="space-y-1">
                             <label className="block font-medium">Brush</label>
