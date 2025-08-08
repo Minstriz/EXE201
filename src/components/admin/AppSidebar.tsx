@@ -3,7 +3,6 @@ import {
   Home,
   ShoppingCart,
   Users,
-  Package,
   PackageOpen,
   Ticket,
 } from "lucide-react";
@@ -36,6 +35,12 @@ export const SIDEBAR_DATA = [
     label: "Orders",
     path: "/admin/order",
     icon: <ShoppingCart />,
+  },
+  {
+    key: "Customize Shirt Order",
+    label: "Customize Shirt Order",
+    path: "/admin/customizeShirtOrder",
+    icon: <Ticket />,
   },
 ];
 

@@ -3,6 +3,11 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as fabric from 'fabric';
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
+import { useAuth } from '../../context/AuthContext';
+import { useRouter } from 'next/navigation';
+import { toast } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function DrawingPage() {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -22,6 +27,16 @@ export default function DrawingPage() {
     const [isBold] = useState(false);
     const [isItalic] = useState(false);
     const [isUnderline] = useState(false);
+    const [showOrderModal, setShowOrderModal] = useState(false);
+
+    const { user, isAuthenticated } = useAuth();
+    const router = useRouter();
+
+    // State cho form đặt áo
+    const [orderName, setOrderName] = useState(user?.fullName || '');
+    const [orderPhone, setOrderPhone] = useState(user?.phone || '');
+    const [orderEmail, setOrderEmail] = useState(user?.email || '');
+    const [orderNote, setOrderNote] = useState('');
 
     // ================= NEW: Upload image into fabric canvas =================
     const handleUploadImage = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -334,6 +349,14 @@ export default function DrawingPage() {
         }
     };
 
+    const handleOpenOrderModal = () => {
+        if (!isAuthenticated) {
+            router.push('/login-mock');
+            return;
+        }
+        setShowOrderModal(true);
+    };
+
     return (
         <div className="min-h-screen bg-gray-100 p-4 mt-20 h-auto">
             <div className="max-w-screen mx-auto space-y-6">
@@ -548,7 +571,12 @@ export default function DrawingPage() {
                             >
                                 Tải ZIP (Áo + Họa tiết)
                             </button>
-                            
+                            <button
+                                onClick={handleOpenOrderModal}
+                                className="pl-5 pr-5 h-10 bg-yellow-600 text-white rounded hover:bg-yellow-700 transition"
+                            >
+                                Đặt áo
+                            </button>
                         </div>
                         <div className="w-full h-[600px] flex">
                             <div
@@ -572,6 +600,111 @@ export default function DrawingPage() {
                 </div>
 
             </div>
+            {showOrderModal && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+    <div className="bg-white rounded-lg shadow-lg p-8 min-w-[350px] relative">
+      <button
+        className="absolute top-2 right-2 text-gray-500 hover:text-gray-800"
+        onClick={() => setShowOrderModal(false)}
+      >
+        &times;
+      </button>
+      <div className="text-lg font-bold mb-4">Đặt áo custom</div>
+      <form
+        className="space-y-4"
+        onSubmit={async e => {
+          e.preventDefault();
+          const canvas = fabricCanvasRef.current;
+          const shirtCanvas = document.getElementById("shirtCanvas") as HTMLCanvasElement;
+          if (!canvas || !shirtCanvas) {
+            toast.error("Canvas chưa sẵn sàng");
+            return;
+          }
+          // Lấy base64 pattern
+          const patternData = canvas.toDataURL({ format: 'png', quality: 1.0, multiplier: 1 });
+          // Đảm bảo shirtCanvas đã merge
+          await applyToShirt(patternData);
+          const shirtData = shirtCanvas.toDataURL('image/png');
+          // Gửi API
+          try {
+            const res = await fetch('/api/shirt-customize-order', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                name: orderName,
+                phone: orderPhone,
+                email: orderEmail,
+                note: orderNote,
+                patternImage: patternData,
+                shirtImage: shirtData,
+                createdAt: new Date().toISOString(),
+              })
+            });
+            if (res.ok) {
+              toast.success('Đặt áo thành công!');
+              setShowOrderModal(false);
+            } else {
+              toast.error('Đặt áo thất bại!');
+            }
+          } catch {
+            toast.error('Lỗi kết nối server!');
+          }
+        }}
+      >
+        <div>
+          <label className="block font-medium mb-1">Tên khách hàng</label>
+          <input
+            type="text"
+            className="w-full border rounded px-3 py-2"
+            value={orderName}
+            onChange={e => setOrderName(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label className="block font-medium mb-1">Số điện thoại</label>
+          <input
+            type="tel"
+            className="w-full border rounded px-3 py-2"
+            value={orderPhone}
+            onChange={e => setOrderPhone(e.target.value)}
+            required
+            pattern="^0[0-9]{9,10}$"
+            title="Số điện thoại hợp lệ bắt đầu bằng 0, 10-11 số"
+          />
+        </div>
+        <div>
+          <label className="block font-medium mb-1">Email</label>
+          <input
+            type="email"
+            className="w-full border rounded px-3 py-2"
+            value={orderEmail}
+            onChange={e => setOrderEmail(e.target.value)}
+            required
+            pattern="^[^@\s]+@[^@\s]+\.[^@\s]+$"
+            title="Email hợp lệ"
+          />
+        </div>
+        <div>
+          <label className="block font-medium mb-1">Ghi chú</label>
+          <textarea
+            className="w-full border rounded px-3 py-2"
+            value={orderNote}
+            onChange={e => setOrderNote(e.target.value)}
+            rows={2}
+          />
+        </div>
+        <button
+          type="submit"
+          className="w-full py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 transition font-bold"
+        >
+          Xác nhận đặt áo
+        </button>
+      </form>
+    </div>
+  </div>
+)}
+            <ToastContainer position="top-center" autoClose={2000} />
         </div>
 
     );
