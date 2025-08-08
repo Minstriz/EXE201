@@ -3,8 +3,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Footer from "@/components/Footer";
-import { Button } from "@/components/ui/button";
-import { FaGoogle, FaFacebookF, FaInstagram, FaEye, FaEyeSlash } from "react-icons/fa";
+import {  FaEye, FaEyeSlash } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useAuth } from "@/app/context/AuthContext";
@@ -79,17 +78,6 @@ export default function LoginMockPage() {
                 Đăng nhập vào tài khoản của bạn
               </p>
 
-              <div className="flex gap-2 mb-4">
-                <Button className="flex items-center gap-2 bg-[#6DB4C9] text-white px-4 py-2 rounded">
-                  <FaGoogle /> Đăng nhập bằng Google
-                </Button>
-                <Button className="bg-gray-400 text-white p-2 rounded-full">
-                  <FaFacebookF />
-                </Button>
-                <Button className="bg-gray-400 text-white p-2 rounded-full">
-                  <FaInstagram />
-                </Button>
-              </div>
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>

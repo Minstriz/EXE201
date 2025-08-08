@@ -213,9 +213,25 @@ const AdminOrdersPage = () => {
                 <td className="py-2 px-4 border-b">
                   <button
                     onClick={() => setSelectedOrder(order)}
-                    className="bg-blue-500 text-white px-3 py-1 rounded"
+                    className="bg-blue-500 text-white px-3 py-1 rounded mr-2"
                   >
                     Chi tiết
+                  </button>
+                  <button
+                    onClick={async () => {
+                      if (window.confirm('Bạn có chắc muốn xoá đơn hàng này?')) {
+                        try {
+                          const res = await fetch(`/api/admin/orders/${order._id}`, { method: 'DELETE' });
+                          if (!res.ok) throw new Error('Xoá thất bại');
+                          fetchOrders();
+                        } catch {
+                          alert('Xoá đơn hàng thất bại!');
+                        }
+                      }
+                    }}
+                    className="bg-red-500 text-white px-3 py-1 rounded"
+                  >
+                    Xoá
                   </button>
                 </td>
               </tr>

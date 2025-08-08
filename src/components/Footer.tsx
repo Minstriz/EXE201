@@ -23,27 +23,27 @@ function Footer() {
           <h3 className="mb-4 text-sm font-semibold uppercase">Trang</h3>
           <ul className="space-y-2 text-sm">
             <li>
-              <Link href="#" className="hover:underline font-medium">
+              <Link href="/" className="hover:underline font-medium">
                 Trang chủ
               </Link>
             </li>
             <li>
-              <Link href="#" className="hover:underline font-medium">
+              <Link href="/about" className="hover:underline font-medium">
                 Giới thiệu
               </Link>
             </li>
             <li>
-              <Link href="#" className="hover:underline font-medium">
+              <Link href="/explore" className="hover:underline font-medium">
                 Khám phá
               </Link>
             </li>
             <li>
-              <Link href="#" className="hover:underline font-medium">
+              <Link href="/products" className="hover:underline font-medium">
                 Sản phẩm
               </Link>
             </li>
             <li>
-              <Link href="#" className="hover:underline font-medium">
+              <Link href="/cart" className="hover:underline font-medium">
                 Giỏ hàng
               </Link>
             </li>
@@ -79,11 +79,11 @@ function Footer() {
             Theo dõi À Sài Gòn
           </h3>
           <div className="flex space-x-4 text-2xl">
-            <Link href="#" className="hover:text-[#FB8501]">
+            <Link href="https://www.facebook.com/profile.php?id=61577441452750&locale=vi_VN" className="hover:text-[#FB8501]">
               <FaFacebookF />
             </Link>
 
-            <Link href="#" className="hover:text-[#FB8501]">
+            <Link href="https://www.tiktok.com/@asaigon_?_t=ZS-8yi1GKPCq4G&_r=1" className="hover:text-[#FB8501]">
               <FaTiktok />
             </Link>
           </div>

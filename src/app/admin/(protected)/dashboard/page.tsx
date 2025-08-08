@@ -81,6 +81,27 @@ function Dashboard() {
   .filter(o => o.status === "paid")
   .reduce((sum, o) => sum + (o.totalAmount || 0), 0);
 
+ // Doanh thu 3 tháng gần nhất
+ const getMonthRevenue = (monthOffset: number) => {
+   const now = new Date();
+   const target = new Date(now.getFullYear(), now.getMonth() - monthOffset, 1);
+   const month = target.getMonth();
+   const year = target.getFullYear();
+   return orders
+     .filter(o => {
+       const d = new Date(o.createdAt);
+       return d.getMonth() === month && d.getFullYear() === year && o.status === "paid";
+     })
+     .reduce((sum, o) => sum + (o.totalAmount || 0), 0);
+ };
+
+ const last3MonthsRevenue = [0, 1, 2].map(offset => getMonthRevenue(offset));
+ const last3MonthsLabels = [0, 1, 2].map(offset => {
+   const now = new Date();
+   const target = new Date(now.getFullYear(), now.getMonth() - offset, 1);
+   return `${target.getMonth() + 1}/${target.getFullYear()}`;
+ });
+
   // Thống kê sản phẩm bán chạy nhất
   const productSales: Record<string, { name: string; image: string; quantity: number }> = {};
   orders.forEach(order => {
@@ -131,6 +152,15 @@ function Dashboard() {
           </div>
         </div>
       )}
+      {/* Doanh thu 3 tháng gần nhất */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10 mt-4">
+        {last3MonthsRevenue.map((revenue, idx) => (
+          <div key={idx} className="bg-white rounded shadow p-6 text-center">
+            <div className="text-xl font-bold text-amber-600">{revenue.toLocaleString()} VND</div>
+            <div className="mt-2 text-gray-600">Doanh thu {last3MonthsLabels[idx]}</div>
+          </div>
+        ))}
+      </div>
       {/* Sản phẩm bán chạy nhất */}
       {!loading && bestSeller && (
         <div className="bg-white rounded shadow p-6 flex items-center gap-6 max-w-xl">
@@ -196,7 +226,7 @@ function Dashboard() {
                   <div key={i} className="flex flex-col items-center">
                     <div className="flex flex-col items-center">
                       <div className="text-sm mb-1 text-gray-700">{count}</div>
-                      <div className="bg-green-500 w-6 rounded" style={{ height: `${count * 8}px` }}></div>
+                      <div className="bg-green-500 w-6 rounded" style={{ height: `${count * 2}px` }}></div>
                       <div className="text-xs mt-1">{i + 1}</div>
                     </div>
                   </div>
