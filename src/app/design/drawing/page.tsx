@@ -1,6 +1,8 @@
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
 import * as fabric from 'fabric';
+import JSZip from "jszip";
+import { saveAs } from "file-saver";
 
 export default function DrawingPage() {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -16,10 +18,56 @@ export default function DrawingPage() {
     const [textValue, setTextValue] = useState('');
     const [fontSize, setFontSize] = useState(24);
     const [fontFamily, setFontFamily] = useState('Arial');
-    const [textAlign, setTextAlign] = useState<'left' | 'center' | 'right'>('left');
-    const [isBold, setIsBold] = useState(false);
-    const [isItalic, setIsItalic] = useState(false);
-    const [isUnderline, setIsUnderline] = useState(false);
+    const [textAlign] = useState<'left' | 'center' | 'right'>('left');
+    const [isBold] = useState(false);
+    const [isItalic] = useState(false);
+    const [isUnderline] = useState(false);
+
+    // ================= NEW: Upload image into fabric canvas =================
+    const handleUploadImage = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = async (f) => {
+            const data = f.target?.result;
+            if (!data || typeof data !== 'string') return;
+
+            try {
+                const img = await fabric.Image.fromURL(data, { crossOrigin: 'anonymous' });
+                const canvas = fabricCanvasRef.current;
+                if (!canvas) return;
+
+                // scale down nếu ảnh quá to
+                const maxDim = Math.min(canvas.getWidth(), canvas.getHeight()) * 0.7;
+                const ratio = Math.min(
+                    maxDim / (img.width ?? maxDim),
+                    maxDim / (img.height ?? maxDim),
+                    1
+                );
+
+                img.set({
+                    left: canvas.getWidth() / 2 - ((img.width ?? 0) * ratio) / 2,
+                    top: canvas.getHeight() / 2 - ((img.height ?? 0) * ratio) / 2,
+                    selectable: true,
+                    hasControls: true,
+                    scaleX: ratio,
+                    scaleY: ratio,
+                    originX: 'left',
+                    originY: 'top',
+                });
+
+                canvas.add(img);
+                canvas.setActiveObject(img);
+                canvas.renderAll();
+            } catch (err) {
+                console.error('Error loading image:', err);
+            }
+        };
+        reader.readAsDataURL(file);
+    };
+
+
+
     const createBrush = React.useCallback((canvas: fabric.Canvas, type: string): fabric.BaseBrush => {
         switch (type) {
             case 'hline': {
@@ -74,9 +122,10 @@ export default function DrawingPage() {
         const brush = canvas.freeDrawingBrush;
         if (!brush) return;
 
-        brush.color = color;
-        brush.width = lineWidth;
-        brush.shadow = new fabric.Shadow({
+        // Fabric.js BaseBrush không khai báo sẵn các property này, nên dùng Partial typing
+        (brush as fabric.BaseBrush & { color?: string; width?: number; shadow?: fabric.Shadow }).color = color;
+        (brush as fabric.BaseBrush & { color?: string; width?: number; shadow?: fabric.Shadow }).width = lineWidth;
+        (brush as fabric.BaseBrush & { color?: string; width?: number; shadow?: fabric.Shadow }).shadow = new fabric.Shadow({
             blur: shadowWidth,
             offsetX: shadowOffset,
             offsetY: shadowOffset,
@@ -84,10 +133,16 @@ export default function DrawingPage() {
             color: shadowColor,
         });
 
-        if ('getPatternSrc' in brush && typeof brush.getPatternSrc === 'function') {
-            (brush as fabric.PatternBrush).source = brush.getPatternSrc.call(brush);
+        if ('getPatternSrc' in brush && typeof (brush as fabric.PatternBrush).getPatternSrc === 'function') {
+            try {
+                (brush as fabric.PatternBrush).source = (brush as fabric.PatternBrush).getPatternSrc.call(brush);
+            } catch {
+                // bỏ err vì không dùng
+            }
         }
     }, [color, lineWidth, shadowColor, shadowWidth, shadowOffset]);
+
+
     useEffect(() => {
         const canvas = fabricCanvasRef.current;
 
@@ -104,6 +159,7 @@ export default function DrawingPage() {
         });
         canvas.renderAll();
     }, [isDrawing]);
+
     useEffect(() => {
         const canvas = canvasRef.current;
         const container = containerRef.current;
@@ -120,21 +176,24 @@ export default function DrawingPage() {
             canvas.style.height = `${height}px`;
         }
     }, []);
+
     useEffect(() => {
         if (!canvasRef.current) return;
         const canvas = new fabric.Canvas(canvasRef.current, {
             isDrawingMode: true,
             preserveObjectStacking: true, // quan trọng để vẽ không che mất SVG
         });
+        // Set a reasonable viewport / size if needed
         fabricCanvasRef.current = canvas;
         const defaultBrush = createBrush(canvas, brushType);
         canvas.freeDrawingBrush = defaultBrush;
         applyBrushSettings(canvas);
 
+        // Optional: make retina scaling off if needed, or handle multiplier on toDataURL
         return () => {
             canvas.dispose();
         };
-    }, []);
+    }, []); // keep initial only
 
     useEffect(() => {
         const canvas = fabricCanvasRef.current;
@@ -149,145 +208,235 @@ export default function DrawingPage() {
         fabricCanvasRef.current?.clear();
     };
     const handleDownload = (format: 'png' | 'jpeg') => {
+        alert(`Đang tải xuống tệp ở định dạng: ${format}`);
         const canvas = fabricCanvasRef.current;
         if (!canvas) return;
-
         const dataURL = canvas.toDataURL({
             format,
             quality: 1.0,
             multiplier: 1,
         });
-
         const link = document.createElement('a');
         link.href = dataURL;
         link.download = `canvas.${format}`;
         link.click();
     };
+
+    /**
+     * applyToShirt: vẽ áo + overlay họa tiết vào canvas #shirtCanvas
+     * Trả về Promise để biết khi nào render xong (để dùng trước khi tạo ZIP)
+     */
+    const applyToShirt = (drawnImage: HTMLImageElement | string): Promise<void> => {
+        return new Promise((resolve) => {
+            const canvas = document.getElementById("shirtCanvas") as HTMLCanvasElement;
+            const ctx = canvas.getContext("2d");
+            if (!ctx) {
+                resolve();
+                return;
+            }
+
+            // Load áo trắng
+            const shirtImage = new Image();
+            // ensure crossOrigin to avoid tainted canvas (so we can export)
+            shirtImage.crossOrigin = 'anonymous';
+            shirtImage.src = "/images/black_white/aotrang.png";
+            shirtImage.onload = () => {
+                // Vẽ nền là áo
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                // Kích thước áo mong muốn
+                const shirtWidth = 400;
+                const shirtHeight = 600;
+
+                // Căn giữa áo trên canvas
+                const shirtX = (canvas.width - shirtWidth) / 2;
+                const shirtY = (canvas.height - shirtHeight) / 2;
+                ctx.drawImage(shirtImage, shirtX, shirtY, shirtWidth, shirtHeight);
+
+                // Load hình đã vẽ (dưới dạng image hoặc base64)
+                const overlay = new Image();
+                overlay.crossOrigin = 'anonymous';
+                overlay.src = typeof drawnImage === "string" ? drawnImage : drawnImage.src;
+
+                overlay.onload = () => {
+                    // Tùy chỉnh vị trí và kích thước hình vẽ trên áo
+                    const x = 150;
+                    const y = 200;
+                    const width = 300;
+                    const height = 300;
+
+                    ctx.drawImage(overlay, x, y, width, height);
+                    // ensure a tiny pause for canvas rasterization if needed, then resolve
+                    // but onload + drawImage is synchronous for drawing into same-origin canvas,
+                    // so resolve immediately
+                    resolve();
+                };
+
+                overlay.onerror = () => {
+                    // even if overlay fails, resolve to avoid blocking
+                    resolve();
+                };
+            };
+
+            shirtImage.onerror = () => {
+                // can't load shirt image, still resolve to avoid hang
+                resolve();
+            };
+        });
+    };
+
+    const handleApplyToShirt = async () => {
+        const canvas = fabricCanvasRef.current;
+        if (!canvas) return;
+
+        const dataURL = canvas.toDataURL({
+            format: 'png',
+            quality: 1.0,
+            multiplier: 1,
+        });
+
+        await applyToShirt(dataURL);
+    };
+
+    // ================= NEW: download ZIP (pattern + shirt merged) =================
+    const handleDownloadZip = async () => {
+        const canvas = fabricCanvasRef.current;
+        const shirtCanvas = document.getElementById("shirtCanvas") as HTMLCanvasElement;
+        if (!canvas || !shirtCanvas) {
+            alert("Canvas chưa sẵn sàng.");
+            return;
+        }
+        alert('Đang tải xuống tệp ZIP');
+        // 1) Render shirt with current pattern (ensure shirtCanvas updated)
+        const patternDataURL = canvas.toDataURL({ format: 'png', quality: 1.0, multiplier: 1 });
+
+        // apply pattern onto shirtCanvas first and wait
+        await applyToShirt(patternDataURL);
+
+        // 2) Get both dataURLs
+        const patternData = patternDataURL; // canvas vẽ (pattern only)
+        // shirtCanvas already updated by applyToShirt
+        const shirtData = shirtCanvas.toDataURL('image/png');
+
+        // 3) Put into ZIP (strip data URL prefix and set base64 true)
+        const zip = new JSZip();
+        try {
+            const patternBase64 = patternData.split(',')[1];
+            const shirtBase64 = shirtData.split(',')[1];
+            zip.file("pattern.png", patternBase64, { base64: true });
+            zip.file("shirt_with_pattern.png", shirtBase64, { base64: true });
+
+            const content = await zip.generateAsync({ type: "blob" });
+            saveAs(content, "designs.zip");
+        } catch (err) {
+            console.error(err);
+            alert("Tạo ZIP thất bại. Kiểm tra console.");
+        }
+    };
+
     return (
-        <div className="min-h-screen bg-gray-100 p-4 mt-20">
+        <div className="min-h-screen bg-gray-100 p-4 mt-20 h-auto">
             <div className="max-w-screen mx-auto space-y-6">
                 <div className="flex flex-col md:flex-row gap-6 md:w-full bg-white shadow rounded-lg p-6">
                     {/* LEFT: Controls */}
                     <div className="w-full md:w-1/3 space-y-4">
-                        <div className="pt-2">
+                        <div className="flex gap-2 md:flex-row">
                             <button
                                 onClick={() => setIsDrawing(!isDrawing)}
-                                className={`w-full py-2 rounded transition ${isDrawing ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-gray-500 hover:bg-gray-600'
+                                className={`w-full md:w-2/3 cursor-pointer py-2 rounded transition ${isDrawing ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'
                                     } text-white`}
                             >
                                 {isDrawing ? 'Tắt Drawing Mode' : 'Bật Drawing Mode'}
                             </button>
+                            <div className="md:w-1/3">
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleUploadImage}
+                                    className="hidden"
+                                    id="upload-image-input"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => document.getElementById("upload-image-input")?.click()}
+                                    className="px-4 py-2 text-black border border-gray-300 cursor-pointer rounded hover:bg-black hover:text-white transition"
+                                >
+                                    Chọn ảnh
+                                </button>
+                            </div>
                         </div>
                         <div className="space-y-2">
-                            <label className="block font-medium">Thêm chữ vào canvas</label>
                             <input
                                 type="text"
                                 value={textValue}
                                 onChange={(e) => setTextValue(e.target.value)}
-                                placeholder="Nhập nội dung..."
+                                placeholder="Nhập Text"
                                 className="w-full px-3 py-2 border border-gray-300 rounded"
                             />
 
                             {/* Font Family */}
-                            <select
-                                value={fontFamily}
-                                onChange={(e) => setFontFamily(e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded"
-                            >
-                                <option value="Arial">Arial</option>
-                                <option value="Times New Roman">Times New Roman</option>
-                                <option value="Courier New">Courier New</option>
-                                <option value="Georgia">Georgia</option>
-                                <option value="Comic Sans MS">Comic Sans MS</option>
-                            </select>
-
-                            {/* Font Size */}
-                            <input
-                                type="number"
-                                value={fontSize}
-                                onChange={(e) => setFontSize(Number(e.target.value))}
-                                className="w-full px-3 py-2 border border-gray-300 rounded"
-                                placeholder="Font Size"
-                            />
-
-                            {/* Text Style Toggle */}
                             <div className="flex gap-2">
-                                <label className="flex items-center gap-1">
-                                    <input type="checkbox" checked={isBold} onChange={() => setIsBold(!isBold)} />
-                                    <span className="text-sm">Bold</span>
-                                </label>
-                                <label className="flex items-center gap-1">
-                                    <input type="checkbox" checked={isItalic} onChange={() => setIsItalic(!isItalic)} />
-                                    <span className="text-sm">Italic</span>
-                                </label>
-                                <label className="flex items-center gap-1">
-                                    <input type="checkbox" checked={isUnderline} onChange={() => setIsUnderline(!isUnderline)} />
-                                    <span className="text-sm">Underline</span>
-                                </label>
+                                <select
+                                    value={fontFamily}
+                                    onChange={(e) => setFontFamily(e.target.value)}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded"
+                                >
+                                    <option value="Arial">Arial</option>
+                                    <option value="Times New Roman">Times New Roman</option>
+                                    <option value="Courier New">Courier New</option>
+                                    <option value="Georgia">Georgia</option>
+                                    <option value="Comic Sans MS">Comic Sans MS</option>
+                                </select>
+
+                                {/* Font Size */}
+                                <input
+                                    type="number"
+                                    value={fontSize}
+                                    onChange={(e) => setFontSize(Number(e.target.value))}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded"
+                                    placeholder="Font Size"
+                                />
+                                <button
+                                    onClick={() => {
+                                        if (!textValue.trim()) return;
+                                        const canvas = fabricCanvasRef.current;
+                                        if (!canvas) return;
+
+                                        const text = new fabric.IText(textValue, {
+                                            left: 100,
+                                            top: 100,
+                                            fill: color,
+                                            fontSize,
+                                            fontFamily,
+                                            fontWeight: isBold ? 'bold' : 'normal',
+                                            fontStyle: isItalic ? 'italic' : 'normal',
+                                            underline: isUnderline,
+                                            textAlign,
+                                            selectable: true,
+                                            shadow: new fabric.Shadow({
+                                                blur: shadowWidth,
+                                                offsetX: shadowOffset,
+                                                offsetY: shadowOffset,
+                                                affectStroke: true,
+                                                color: shadowColor,
+                                            }),
+                                        });
+
+                                        canvas.add(text);
+                                        canvas.setActiveObject(text);
+                                        canvas.renderAll();
+                                        setTextValue('');
+                                    }}
+                                    className="w-full py-2 cursor-pointer bg-indigo-600 text-white rounded hover:bg-indigo-700 transition"
+                                >
+                                    Thêm chữ
+                                </button>
                             </div>
 
-                            {/* Text Alignment */}
-                            <div className="flex gap-2">
-                                <button
-                                    className={`flex-1 py-1 rounded border ${textAlign === 'left' ? 'bg-indigo-500 text-white' : 'bg-white'} `}
-                                    onClick={() => setTextAlign('left')}
-                                >
-                                    Left
-                                </button>
-                                <button
-                                    className={`flex-1 py-1 rounded border ${textAlign === 'center' ? 'bg-indigo-500 text-white' : 'bg-white'} `}
-                                    onClick={() => setTextAlign('center')}
-                                >
-                                    Center
-                                </button>
-                                <button
-                                    className={`flex-1 py-1 rounded border ${textAlign === 'right' ? 'bg-indigo-500 text-white' : 'bg-white'} `}
-                                    onClick={() => setTextAlign('right')}
-                                >
-                                    Right
-                                </button>
-                            </div>
-
-                            <button
-                                onClick={() => {
-                                    if (!textValue.trim()) return;
-                                    const canvas = fabricCanvasRef.current;
-                                    if (!canvas) return;
-
-                                    const text = new fabric.IText(textValue, {
-                                        left: 100,
-                                        top: 100,
-                                        fill: color,
-                                        fontSize,
-                                        fontFamily,
-                                        fontWeight: isBold ? 'bold' : 'normal',
-                                        fontStyle: isItalic ? 'italic' : 'normal',
-                                        underline: isUnderline,
-                                        textAlign,
-                                        selectable: true,
-                                        shadow: new fabric.Shadow({
-                                            blur: shadowWidth,
-                                            offsetX: shadowOffset,
-                                            offsetY: shadowOffset,
-                                            affectStroke: true,
-                                            color: shadowColor,
-                                        }),
-                                    });
-
-                                    canvas.add(text);
-                                    canvas.setActiveObject(text);
-                                    canvas.renderAll();
-                                    setTextValue('');
-                                }}
-                                className="w-full py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition"
-                            >
-                                Thêm chữ
-                            </button>
                         </div>
 
                         {/* Brush type */}
                         <div className="space-y-1">
-                            <label className="block font-medium">Brush</label>
+                            <label className="block font-bold">Brush</label>
                             <select
                                 className="w-full border border-gray-300 rounded px-3 py-2"
                                 value={brushType}
@@ -302,17 +451,28 @@ export default function DrawingPage() {
                             </select>
                         </div>
 
-                        {/* Color */}
-                        <div className="space-y-1">
-                            <label className="block font-medium">Color</label>
-                            <input
-                                type="color"
-                                value={color}
-                                onChange={(e) => setColor(e.target.value)}
-                                className="w-full h-10 rounded border border-gray-300"
-                            />
+                        <div className="flex gap-5">
+                            {/* Color */}
+                            <div className="space-y-1">
+                                <label className="block font-bold">Color</label>
+                                <input
+                                    type="color"
+                                    value={color}
+                                    onChange={(e) => setColor(e.target.value)}
+                                    className="w-full h-10 rounded border border-gray-300"
+                                />
+                            </div>
+                            {/* Shadow Color */}
+                            <div className="space-y-1">
+                                <label className="block font-bold">Shadow Color</label>
+                                <input
+                                    type="color"
+                                    value={shadowColor}
+                                    onChange={(e) => setShadowColor(e.target.value)}
+                                    className="w-full h-10 rounded border border-gray-300"
+                                />
+                            </div>
                         </div>
-
                         {/* Line Width */}
                         <div className="space-y-1">
                             <label className="block font-medium">Line Width ({lineWidth})</label>
@@ -325,18 +485,6 @@ export default function DrawingPage() {
                                 className="w-full"
                             />
                         </div>
-
-                        {/* Shadow Color */}
-                        <div className="space-y-1">
-                            <label className="block font-medium">Shadow Color</label>
-                            <input
-                                type="color"
-                                value={shadowColor}
-                                onChange={(e) => setShadowColor(e.target.value)}
-                                className="w-full h-10 rounded border border-gray-300"
-                            />
-                        </div>
-
                         {/* Shadow Blur */}
                         <div className="space-y-1">
                             <label className="block font-medium">Shadow Blur ({shadowWidth})</label>
@@ -363,51 +511,66 @@ export default function DrawingPage() {
                             />
                         </div>
 
-                        <div className="flex flex-col">
+                    </div>
+
+                    <div className="flex flex-col md:flex w-full  md:flex-col gap-4">
+                        {/* RIGHT: Canvas */}
+                        <div className="flex flex-col gap-2 md:flex-row w-full justify-start">
                             {/* Clear Button */}
-                            <div className="pt-2">
-                                <button
-                                    onClick={handleClear}
-                                    className="w-full py-2 bg-red-500 text-white rounded hover:bg-red-600 transition"
-                                >
-                                    Xoá Canvas
-                                </button>
-                            </div>
-                            <div className="flex gap-2 pt-2">
-                                <button
-                                    onClick={() => handleDownload('png')}
-                                    className="w-full py-2 bg-blue-950 text-white rounded hover:bg-blue-600 transition"
-                                >
-                                    Tải xuống (PNG)
-                                </button>
-                                <button
-                                    onClick={() => handleDownload('jpeg')}
-                                    className="w-full py-2 bg-green-700 text-white rounded hover:bg-green-600 transition"
-                                >
-                                    Tải xuống (JPG)
-                                </button>
+                            <button
+                                onClick={handleClear}
+                                className="pl-5 pr-5 h-10 bg-red-500 text-white rounded hover:bg-red-600 transition"
+                            >
+                                Xoá Canvas
+                            </button>
+
+                            <button
+                                onClick={handleApplyToShirt}
+                                className="pl-5 pr-5 h-10 bg-teal-600 text-white rounded hover:bg-teal-700 transition"
+                            >
+                                Áp dụng lên áo
+                            </button>
+                            <button
+                                onClick={() => handleDownload('png')}
+                                className="pl-5 pr-5 h-10 bg-blue-950 text-white rounded hover:bg-blue-600 transition"
+                            >
+                                Tải xuống (PNG)
+                            </button>
+                            <button
+                                onClick={() => handleDownload('jpeg')}
+                                className="pl-5 pr-5 h-10 bg-green-700 text-white rounded hover:bg-green-600 transition"
+                            >
+                                Tải xuống (JPG)
+                            </button>
+                            <button
+                                onClick={handleDownloadZip}
+                                className="pl-5 pr-5 h-10 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition"
+                            >
+                                Tải ZIP (Áo + Họa tiết)
+                            </button>
+                            
+                        </div>
+                        <div className="w-full h-[600px] flex">
+                            <div
+                                ref={containerRef}
+                                className="w-full  h-[600px] bg-grey-50 border border-gray-300 rounded"
+                            >
+                                <canvas
+                                    id="canvas"
+                                    width={1000}
+                                    height={1000}
+                                    ref={canvasRef}
+                                    className="w-full h-full border"
+                                />
                             </div>
                         </div>
 
-                    </div>
-
-                    {/* RIGHT: Canvas */}
-                    <div className="w-full h-[600px] md:w-2/3 flex items-start justify-start">
-                        <div
-                            ref={containerRef}
-                            className="w-full  h-[600px] bg-grey-50 border border-gray-300 rounded"
-                        >
-                            <canvas
-                                id="canvas"
-                                width={1000}
-                                height={1000}
-                                ref={canvasRef}
-                                className="w-full h-full border"
-                            />
+                        <div className="shirtContainer h-[600px] flex justify-center items-center md:overflow-hidden md:">
+                            <canvas id="shirtCanvas" width={600} height={600}></canvas>
                         </div>
                     </div>
-
                 </div>
+
             </div>
         </div>
 
