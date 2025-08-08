@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import React from "react";
-import { FaFacebookF, FaInstagram, FaTiktok, FaYoutube } from "react-icons/fa";
+import { FaFacebookF, FaTiktok } from "react-icons/fa";
 
 function ContactPage() {
   return (
@@ -30,11 +30,11 @@ function ContactPage() {
                 - Viet Nam
               </p>
               <div className="flex space-x-4 mt-4">
-                <Link href="#" className="text-gray-600 hover:text-[#1877f2]">
+                <Link href="https://www.facebook.com/profile.php?id=61577441452750&locale=vi_VN" className="text-gray-600 hover:text-[#1877f2]">
                   <FaFacebookF size={20} />
                 </Link>
 
-                <Link href="#" className="text-gray-600 hover:text-black">
+                <Link href="https://www.tiktok.com/@asaigon_?_t=ZS-8yi1GKPCq4G&_r=1" className="text-gray-600 hover:text-black">
                   <FaTiktok size={20} />
                 </Link>
               </div>
@@ -51,7 +51,7 @@ function ContactPage() {
                 Nếu bạn có câu hỏi về bán hàng liên quan đến bán hàng quảng cáo
                 hoặc kinh doanh trưng bày, vui lòng{" "}
                 <a
-                  href="#"
+                  href="https://www.facebook.com/profile.php?id=61577441452750&locale=vi_VN"
                   className="text-[#219EBC] underline hover:text-[#1b89a0]"
                 >
                   liên hệ với À Sài Gòn tại đây

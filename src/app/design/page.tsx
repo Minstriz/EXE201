@@ -15,11 +15,6 @@ const products = [
     link: "/design/tote/customize",
   },
   {
-    title:"Tự thiết kế",
-    image: "/images/black_white/aotrang.png",
-    link: "/design/create/",
-  },
-  {
     title: "Tự vẽ",
     image:"/images/black_white/aotrang.png",
     link:"/design/drawing/"

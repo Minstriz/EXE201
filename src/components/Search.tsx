@@ -224,7 +224,7 @@ function SearchSection() {
             </Link>
             <span className="font-bold">HOẶC</span>
             <Link
-              href="#"
+              href="/design"
               className="bg-[#219EBC] text-white border border-[#219EBC] py-2 px-4 rounded-xl flex items-center gap-2 transition hover:bg-white hover:text-[#219EBC]"
             >
               Tự thiết kế sản phẩm của bạn
