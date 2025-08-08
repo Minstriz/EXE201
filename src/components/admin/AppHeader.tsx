@@ -7,22 +7,8 @@ import {
   PackageOpen,
   Ticket,
 } from "lucide-react";
-import { Button } from "../ui/button";
-import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "../ui/sheet";
-// import { ModeToggle } from "../ui/mode-toggle";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
-import Link from "next/link";
-// import { useEffect, useState } from "react";
-import { CircleUser, Menu } from "lucide-react";
 import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
+import {  useRouter } from "next/navigation";
 export const SIDEBAR_DATA = [
   {
     key: "dashboard",
@@ -53,6 +39,12 @@ export const SIDEBAR_DATA = [
     label: "Orders",
     path: "/admin/orders",
     icon: <ShoppingCart />,
+  },
+  {
+    key: "Customize Shirt Order",
+    label: "Customize Shirt Order",
+    path: "/admin/customizeShirtOrder",
+    icon: <Ticket />,
   },
 ];
 
