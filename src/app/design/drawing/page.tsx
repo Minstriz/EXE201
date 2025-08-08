@@ -193,6 +193,7 @@ export default function DrawingPage() {
         return () => {
             canvas.dispose();
         };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []); // keep initial only
 
     useEffect(() => {
@@ -444,7 +445,6 @@ export default function DrawingPage() {
                             >
                                 <option value="Pencil">Pencil</option>
                                 <option value="Circle">Circle</option>
-                                <option value="Square">Square</option>
                                 <option value="Spray">Spray</option>
                                 <option value="hline">H-Pattern</option>
                                 <option value="vline">V-Pattern</option>
