@@ -24,7 +24,7 @@ export interface IOrder extends Document {
 
 // Define the schema for OrderItem (as a sub-schema)
 const OrderItemSchema = new Schema({
-  id: { type: Number, required: true },
+  id: { type: String, required: true },
   name: { type: String, required: true },
   price: { type: Number, required: true },
   image: { type: String },

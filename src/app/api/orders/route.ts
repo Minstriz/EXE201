@@ -4,7 +4,7 @@ import Order from '@/models/Order';
 import mongoose from 'mongoose'; // Import mongoose to use Types.ObjectId
 
 export async function POST(request: Request) {
-  await dbConnect(); // Kết nối đến MongoDB
+  await dbConnect(); 
   try {
     const body = await request.json();
     const { userId, items, totalAmount, status, paymentId } = body;

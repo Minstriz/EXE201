@@ -75,7 +75,7 @@ const COLORS = [
 ];
 
 export default function TshirtDetailPage() {
-  const { slug } = useParams();
+  const { slug } = useParams() as { slug: string };
   const product = tshirtProducts.find((p) => p.slug === slug);
   const { addToCart } = useCart();
 
@@ -88,7 +88,7 @@ export default function TshirtDetailPage() {
 
   const colorLabel = selectedColor === "white" ? "Trắng" : "Đen";
   const uniqueId = `${product.id}_${selectedColor}_${selectedSize}`;
-
+  console.log("uniqueId:", uniqueId);
   const handleAddToCart = () => {
     addToCart({
       id: uniqueId,
@@ -98,6 +98,7 @@ export default function TshirtDetailPage() {
       quantity,
       category: "ÁO THUN",
     });
+    console.log("unque id",uniqueId);
     toast.success("Đã thêm vào giỏ hàng");
   };
 

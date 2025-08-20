@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 import React, { useEffect, useState } from "react";
 import { useCart } from "@/app/context/CartContext";
@@ -70,8 +71,9 @@ export default function CartPage() {
           quantity: item.quantity
         })),
         totalAmount: totalAmount,
-        status: "pending", // Trạng thái ban đầu là pending
+        status: "pending", 
       };
+      console.log("order data", orderData);
       const saveOrderResponse = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -81,7 +83,7 @@ export default function CartPage() {
         throw new Error("Lỗi khi lưu đơn hàng");
       }
       const savedOrder = await saveOrderResponse.json();
-      // Bước 2: Tạo thanh toán với VNPay sử dụng ID đơn hàng từ backend
+      
       const paymentResponse = await fetch("/api/create-payment", {
         method: "POST",
         headers: {
@@ -337,7 +339,7 @@ export default function CartPage() {
             >
               {isProcessing ? 'Đang xử lý...' : 'Đã thanh toán xong'}
             </Button>
-            <p className="text-sm text-gray-500 mt-2">Sau khi chuyển khoản, nhấn "Đã thanh toán xong" để hoàn tất đơn hàng.</p>
+            <p className="text-sm text-gray-500 mt-2">Sau khi chuyển khoản, nhấn &quot Đã thanh toán xong &quot để hoàn tất đơn hàng.</p>
           </div>
         </div>
       )}
