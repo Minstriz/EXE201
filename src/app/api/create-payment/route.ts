@@ -10,7 +10,7 @@ export async function POST(request: Request) {
     const vnp_TmnCode = process.env.VNP_TMN_CODE;
     const vnp_HashSecret = process.env.VNP_HASH_SECRET;
     const vnp_Url = process.env.VNP_URL;
-    const vnp_ReturnUrl = process.env.NEXT_PUBLIC_APP_URL + "/payment/vnpay-return"; // Sẽ tạo trang này sau
+    const vnp_ReturnUrl = process.env.NEXT_PUBLIC_APP_URL + "/payment/vnpay-return";
 
     if (!vnp_TmnCode || !vnp_HashSecret || !vnp_Url || !vnp_ReturnUrl) {
       throw new Error("Missing VNPay environment variables");
